@@ -32,7 +32,6 @@ const Sidebar = () => {
             <div className="rounded bg-[#e5e5e5] h-[20px] flex items-center justify-center py-0.5 px-2 text-[11px] text-dimgray ml-auto">
               <div className="relative leading-[17px]">{badgeCount}</div>
             </div>
-            
           )}
         </Link>
       );
@@ -48,7 +47,9 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-2 text-[12px] font-sf-pro w-full">
-        <b className="px-6 mb-1 text-base text-darkslateblue">Manajemen Pengguna</b>
+        <b className="px-6 mb-1 text-base text-darkslateblue">
+          Manajemen Pengguna
+        </b>
         {renderNavItem(
           "/",
           <UsersRound className="w-4 h-4 stroke-current" />,
@@ -56,7 +57,9 @@ const Sidebar = () => {
           99
         )}
 
-        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Manajemen Rekber</b>
+        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
+          Manajemen Rekber
+        </b>
         {renderNavItem(
           "/users",
           <Activity className="w-4 h-4 stroke-current" />,
@@ -64,7 +67,9 @@ const Sidebar = () => {
           99
         )}
 
-        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Dispute Center</b>
+        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
+          Dispute Center
+        </b>
         {renderNavItem(
           "/dispute",
           <Shuffle className="w-4 h-4 stroke-current" />,

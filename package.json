@@ -10,12 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.6",
     "@heroicons/react": "^2.2.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
+    "@mui/styled-engine-sc": "^7.1.1",
     "@tailwindcss/vite": "^4.1.8",
     "lucide-react": "^0.514.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
+    "styled-components": "^6.1.19",
     "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
