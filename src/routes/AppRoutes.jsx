@@ -10,27 +10,27 @@ const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path='/' element={<Login />} />
         <Route
-          path="/user"
+          path='/user'
           element={
-              <MainLayout>
-                <Users />
-              </MainLayout>
+            <MainLayout>
+              <Users />
+            </MainLayout>
           }
         />
 
         <Route
-          path="/transaction"
+          path='/transactions'
           element={
-              <MainLayout>
-                <Transaksi />
-              </MainLayout>
+            <MainLayout>
+              <Transaksi />
+            </MainLayout>
           }
         />
 
         <Route
-          path="transaction/:transactionId"
+          path='transactions/:transactionId'
           element={
             <MainLayout>
               <RekberDetailPage />
