@@ -1,26 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import Dashboard from "../pages/Dashboard";
-import Users from "../pages/Users";
+import Users from "../pages/User";
+import Transaksi from "../pages/Transaksi";
+import Login from "../pages/Login";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route
-          path='/'
+          path="/"
           element={
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
+              <MainLayout>
+                
+                <Users />
+              </MainLayout>
           }
         />
+
         <Route
-          path='/users'
+          path="/transaksi"
           element={
-            <MainLayout>
-              <Users />
-            </MainLayout>
+              <MainLayout>
+                <Transaksi />
+              </MainLayout>
           }
         />
       </Routes>

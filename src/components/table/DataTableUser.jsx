@@ -10,7 +10,7 @@ import {
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon } from "lucide-react"; // Import icons
 
-const DataTable = () => {
+const DataTableUser = () => {
   // Helper to format Date object to your desired string format for display
   const formatDateTimeForDisplay = (dateObj) => {
     if (!dateObj) return '';
@@ -333,4 +333,4 @@ const DataTable = () => {
   );
 };
 
-export default DataTable;
+export default DataTableUser;

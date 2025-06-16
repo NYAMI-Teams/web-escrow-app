@@ -10,12 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import logo from "../assets/logorekber.png"; // Ganti dengan path logo yang sesuai
+import logo from "../assets/logorekber.png";
+import sideImage from "../assets/side-image.png";
 
-// Komponen ilustrasi login
-
-
-// Form Login
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -131,19 +128,21 @@ const LoginForm = () => {
 // Halaman Login Utama
 const Login = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50">
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      <div className="hidden lg:block">
+        <img
+          src={sideImage}
+          alt="Side Illustration"
+          className="w-full h-screen object-cover"
+        />
+      </div>
 
-          {/* Kanan - Form Login */}
-          <div className="flex items-center justify-center">
-            <LoginForm />
-          </div>
-        </div>
+      <div className="flex items-center justify-center p-8 bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50">
+        <LoginForm />
       </div>
     </div>
   );
 };
+
 
 export default Login;
