@@ -51,7 +51,7 @@ const Sidebar = () => {
           Manajemen Pengguna
         </b>
         {renderNavItem(
-          "manajemenPengguna/pengguna",
+          "/user",
           <UsersRound className="w-4 h-4 stroke-current" />,
           "User",
           99
@@ -61,7 +61,7 @@ const Sidebar = () => {
           Manajemen Rekber
         </b>
         {renderNavItem(
-          "manajemenRekber/Rekber",
+          "/transaction",
           <Activity className="w-4 h-4 stroke-current" />,
           "Transaksi",
           99
