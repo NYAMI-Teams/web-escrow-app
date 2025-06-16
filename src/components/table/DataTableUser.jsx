@@ -9,28 +9,43 @@ import {
   TableRow,
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon } from "lucide-react"; // Import icons
+import { useNavigate } from "react-router-dom";
 
 const DataTableUser = () => {
   // Helper to format Date object to your desired string format for display
   const formatDateTimeForDisplay = (dateObj) => {
-    if (!dateObj) return '';
-    const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    if (!dateObj) return "";
+    const formattedDate = dateObj.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const formattedTime = dateObj.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     return `${formattedDate}, ${formattedTime}`;
   };
 
   // Initial data generation (done only once on component mount)
-  const [initialUserData] = useState(() => { // Renamed to initialUserData
+  const [initialUserData] = useState(() => {
+    // Renamed to initialUserData
     const generatedData = Array.from({ length: 30 }, (_, i) => {
       // Generate random time for "registrationDate"
       const now = new Date();
-      const randomOffsetSeconds = Math.floor(Math.random() * (60 * 24 * 60 * 60)); // Up to 60 days ago
-      const randomDate = new Date(now.getTime() - (randomOffsetSeconds * 1000));
+      const randomOffsetSeconds = Math.floor(
+        Math.random() * (60 * 24 * 60 * 60)
+      ); // Up to 60 days ago
+      const randomDate = new Date(now.getTime() - randomOffsetSeconds * 1000);
 
       return {
         id: `RBK-000000${i + 1}`,
         name: `User Name ${i + 1}`,
-        email: `user${i + 1}@example.com${i % 3 === 0 ? 'thisisavvvvvvvvvvvvvvvverylongemailaddressforvisualtestthatshouldbetruncateddynamically.com' : ''}`,
+        email: `user${i + 1}@example.com${
+          i % 3 === 0
+            ? "thisisavvvvvvvvvvvvvvvverylongemailaddressforvisualtestthatshouldbetruncateddynamically.com"
+            : ""
+        }`,
         registrationDate: randomDate, // Store Date object directly
         kycStatus: "Terverifikasi", // All users are "Terverifikasi"
       };
@@ -44,8 +59,10 @@ const DataTableUser = () => {
   const itemsPerPage = 10;
 
   // Default sortConfig: sort by registrationDate, descending (recent first)
-  const [sortConfig, setSortConfig] = useState({ key: 'registrationDate', direction: 'descending' });
-
+  const [sortConfig, setSortConfig] = useState({
+    key: "registrationDate",
+    direction: "descending",
+  });
 
   // Memoize filtered and sorted data for performance
   const processedData = useMemo(() => {
@@ -57,16 +74,18 @@ const DataTableUser = () => {
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
 
-        if (sortConfig.key === 'registrationDate') {
+        if (sortConfig.key === "registrationDate") {
           // Compare Date objects directly
-          return sortConfig.direction === 'ascending' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
-        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return sortConfig.direction === "ascending"
+            ? aValue.getTime() - bValue.getTime()
+            : bValue.getTime() - aValue.getTime();
+        } else if (typeof aValue === "string" && typeof bValue === "string") {
           // Fallback for other string columns if needed, though not explicitly requested to sort
           if (aValue.toLowerCase() < bValue.toLowerCase()) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
+            return sortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aValue.toLowerCase() > bValue.toLowerCase()) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
+            return sortConfig.direction === "ascending" ? 1 : -1;
           }
         }
         // No specific sorting for other types as per current request, keep as is
@@ -77,10 +96,11 @@ const DataTableUser = () => {
     return sortableItems;
   }, [initialUserData, sortConfig]);
 
-
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
-  const currentItems = processedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
+  const currentItems = processedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Update selectAll state based on checkedItems of the current page
   useEffect(() => {
@@ -110,44 +130,45 @@ const DataTableUser = () => {
 
   // Function to handle sorting click
   const handleSort = (key) => {
-    let direction = 'ascending';
+    let direction = "ascending";
     if (sortConfig && sortConfig.key === key) {
-      if (sortConfig.direction === 'ascending') {
-        direction = 'descending';
+      if (sortConfig.direction === "ascending") {
+        direction = "descending";
       } else {
         // If already descending, and it's the current sort column,
         // revert to the default (descending) time sort.
         // For 'Tanggal Registrasi', clicking again (from descending) should make it ascending
         // then clicking again should make it descending, creating a cycle.
         // If it's a different column that used to be sortable, this logic would reset to default.
-        if (key === 'registrationDate') { // specific for the single sortable column
-            direction = 'ascending'; // If current is descending, next click makes it ascending
+        if (key === "registrationDate") {
+          // specific for the single sortable column
+          direction = "ascending"; // If current is descending, next click makes it ascending
         } else {
-            // This else block is for if we had multiple sortable columns.
-            // For now, only Tanggal Registrasi is sortable, so this block won't be hit
-            // unless we add other sortable columns.
+          // This else block is for if we had multiple sortable columns.
+          // For now, only Tanggal Registrasi is sortable, so this block won't be hit
+          // unless we add other sortable columns.
         }
       }
     } else {
-        // If a new sort key is clicked, default direction is ascending
-        // Except for registrationDate, where default click should be descending (most recent)
-        if (key === 'registrationDate') {
-            direction = 'descending';
-        }
+      // If a new sort key is clicked, default direction is ascending
+      // Except for registrationDate, where default click should be descending (most recent)
+      if (key === "registrationDate") {
+        direction = "descending";
+      }
     }
-    
+
     setSortConfig({ key, direction });
     setCurrentPage(1); // Reset to first page on sort
   };
 
-
   // Helper to get arrow icon and rotation
-  const getArrowIcon = (key) => { // Removed type parameter as only one type of interactive header now
+  const getArrowIcon = (key) => {
+    // Removed type parameter as only one type of interactive header now
     if (sortConfig && sortConfig.key === key) {
       return (
         <ChevronDownIcon
           className={`w-3 h-3 text-[#5c5c5c] transition-transform duration-200 ${
-            sortConfig.direction === 'ascending' ? 'rotate-180' : ''
+            sortConfig.direction === "ascending" ? "rotate-180" : ""
           }`}
         />
       );
@@ -155,10 +176,16 @@ const DataTableUser = () => {
     return null; // Don't show icon if not the active sort column
   };
 
+  const navigate = useNavigate();
+  const handleViewDetail = (id) => {
+    navigate(`/user/${id}`);
+  };
 
   return (
     <div className="flex w-full justify-center p-4">
-      <div className="w-full max-w-[1120px] overflow-x-auto"> {/* Added overflow-x-auto */}
+      <div className="w-full max-w-[1120px] overflow-x-auto">
+        {" "}
+        {/* Added overflow-x-auto */}
         {/* Component to display the total number of items */}
         <div className="relative w-full flex flex-row items-center justify-start gap-6 text-left text-black font-sf-pro mb-4">
           <div className="relative font-semibold text-lg sm:text-xl md:text-2xl lg:text-xl">
@@ -170,8 +197,9 @@ const DataTableUser = () => {
           </div>
         </div>
         {/* End of component to display the total number of items */}
-
-        <Table className="border-collapse border border-[#c9c9c9] w-full"> {/* Added w-full */}
+        <Table className="border-collapse border border-[#c9c9c9] w-full">
+          {" "}
+          {/* Added w-full */}
           <TableHeader>
             <TableRow className="bg-[#f3f3f3] border-b border-[#c9c9c9]">
               {/* Checkbox Column */}
@@ -202,7 +230,9 @@ const DataTableUser = () => {
               </TableHead>
 
               {/* Email Column Header */}
-              <TableHead className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[250px]"> {/* Increased min-width for email */}
+              <TableHead className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[250px]">
+                {" "}
+                {/* Increased min-width for email */}
                 <div className="flex items-center justify-between w-full">
                   <span>Email</span>
                 </div>
@@ -211,11 +241,11 @@ const DataTableUser = () => {
               {/* Tanggal Registrasi Column - Clickable for Sorting */}
               <TableHead
                 className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[180px]"
-                onClick={() => handleSort('registrationDate')}
+                onClick={() => handleSort("registrationDate")}
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Tanggal Registrasi</span>
-                  {getArrowIcon('registrationDate')}
+                  {getArrowIcon("registrationDate")}
                 </div>
               </TableHead>
 
@@ -235,7 +265,6 @@ const DataTableUser = () => {
               </TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {currentItems.map((user, index) => (
               <TableRow
@@ -289,15 +318,17 @@ const DataTableUser = () => {
 
                 {/* Action Cell */}
                 <TableCell className="w-[52px] p-0">
-                  <div className="flex h-[38px] items-center justify-center cursor-pointer hover:text-blue-500">
-                    <ArrowRightIcon className="w-4 h-4 text-[#5c5c5c]" />
+                  <div className="flex h-[38px] items-center justify-center">
+                    <ArrowRightIcon
+                      className="w-4 h-4 text-[#5c5c5c] cursor-pointer hover:text-blue-600 transition"
+                      onClick={() => handleViewDetail("detail")}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-
         {/* Pagination Controls */}
         <div className="flex justify-end items-center mt-4 space-x-2">
           <button
