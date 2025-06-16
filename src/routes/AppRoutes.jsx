@@ -8,19 +8,18 @@ const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route
-          path="/"
+          path="manajemenPengguna/pengguna"
           element={
               <MainLayout>
-                
                 <Users />
               </MainLayout>
           }
         />
 
         <Route
-          path="/transaksi"
+          path="manajemenRekber/Rekber"
           element={
               <MainLayout>
                 <Transaksi />
