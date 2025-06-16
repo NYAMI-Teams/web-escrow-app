@@ -12,7 +12,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="user"
+          path="/user"
           element={
               <MainLayout>
                 <Users />
@@ -21,16 +21,7 @@ const AppRoutes = () => {
         />
 
         <Route
-          path="user/:userId"
-          element={
-            <MainLayout>
-              <UserDetail />
-            </MainLayout>
-          }
-        />
-
-        <Route
-          path="transaction"
+          path="/transaction"
           element={
               <MainLayout>
                 <Transaksi />
