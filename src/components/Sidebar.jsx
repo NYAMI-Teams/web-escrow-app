@@ -53,7 +53,7 @@ const Sidebar = () => {
         {renderNavItem(
           "/",
           <UsersRound className="w-4 h-4 stroke-current" />,
-          "Dashboard",
+          "User",
           99
         )}
 
@@ -61,19 +61,19 @@ const Sidebar = () => {
           Manajemen Rekber
         </b>
         {renderNavItem(
-          "/users",
+          "/transaksi",
           <Activity className="w-4 h-4 stroke-current" />,
-          "Users",
+          "Transaksi",
           99
         )}
 
         <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
-          Dispute Center
+          Manajemen Komplain
         </b>
         {renderNavItem(
           "/dispute",
           <Shuffle className="w-4 h-4 stroke-current" />,
-          "Dispute"
+          "Komplain"
         )}
       </nav>
     </div>

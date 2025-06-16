@@ -1,16 +1,20 @@
 import { ChevronDown } from "lucide-react";
 
-const ButtonDropdown = ({ placeholder }) => {
+const ButtonDropdown = ({ placeholder, options, value, onChange }) => {
   return (
     <div className="w-full flex flex-col text-left text-[13px] text-darkslategray font-sf-pro">
-      <div className="w-full h-8 flex items-center gap-2 bg-white border border-dimgray rounded-lg overflow-hidden px-2">
-        <input
-          type="text"
-          placeholder={placeholder}
-          className="flex-1 h-full bg-transparent outline-none text-[13px] leading-[18px] placeholder-dimgray"
-        />
-        <ChevronDown className="w-4 h-4 stroke-current" />
-      </div>
+        <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-8 bg-white border border-dimgray rounded-lg px-2 text-[13px] outline-none"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option, idx) => (
+          <option key={idx} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };
