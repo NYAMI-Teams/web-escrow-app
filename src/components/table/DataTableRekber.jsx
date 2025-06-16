@@ -21,29 +21,32 @@ const DataTableRekber = () => {
 
   // Initial data generation (done only once on component mount)
   const [initialRekberData] = useState(() => {
-    const statuses = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian"];
+    // Tambahkan "Rekber Dibatalkan" ke daftar status yang mungkin
+    const statuses = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian", "Rekber Dibatalkan"];
 
     const generatedData = Array.from({ length: 30 }, (_, i) => {
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 
       let pengajuanStatus;
+      // Jika status Rekber "Dalam Pengiriman", pilih dari opsi pengajuan
+      // Jika status Rekber "Rekber Dibatalkan", secara otomatis "Tanpa Pengajuan"
+      // Untuk status Rekber lainnya, juga "Tanpa Pengajuan"
       if (randomStatus === "Dalam Pengiriman") {
         const pengajuanOptions = ["Ditolak", "Ditinjau", "Tanpa Pengajuan", "Menunggu Buyer"];
         pengajuanStatus = pengajuanOptions[Math.floor(Math.random() * pengajuanOptions.length)];
+      } else if (randomStatus === "Rekber Dibatalkan") {
+        pengajuanStatus = "Tanpa Pengajuan"; // Pasti "Tanpa Pengajuan" jika Rekber Dibatalkan
       } else {
-        pengajuanStatus = "Tanpa Pengajuan";
+        pengajuanStatus = "Tanpa Pengajuan"; // Status lain selalu "Tanpa Pengajuan"
       }
 
       // Generate random time for "Waktu Bikin Rekber"
-      // Ensure more recent dates for good default sort example
       const now = new Date();
-      // Generate dates within the last ~60 days, focusing on recent
       const randomOffsetSeconds = Math.floor(Math.random() * (60 * 24 * 60 * 60)); 
       const randomDate = new Date(now.getTime() - (randomOffsetSeconds * 1000));
 
       return {
         idTransaksi: `TRX-${1000000 + i}`,
-        // Store Date object directly
         waktuBikinRekber: randomDate, 
         namaBarang: `Produk XYZ ${i % 2 === 0 ? 'yang sangat panjang sekali agar bisa melihat fitur truncation berjalan dengan baik' : ''} ${i + 1}`,
         pembeliEmail: `buyer${i + 1}@email.com${i % 5 === 0 ? 'verylongbuyeremailforcapturingtruncation@example.com' : ''}`,
@@ -69,12 +72,13 @@ const DataTableRekber = () => {
 
   // Memoize filtered and sorted data for performance
   const processedData = useMemo(() => {
-    let sortableItems = [...initialRekberData]; // Use initial data as base
+    let sortableItems = [...initialRekberData]; 
 
     // Apply categorization/grouping first if active
     if (filterConfig) {
       if (filterConfig.key === 'statusRekber') {
-        const order = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian"];
+        // Tambahkan "Rekber Dibatalkan" ke urutan kategorisasi Status Rekber
+        const order = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian", "Rekber Dibatalkan"];
         sortableItems.sort((a, b) => order.indexOf(a.statusRekber) - order.indexOf(b.statusRekber));
       } else if (filterConfig.key === 'kolomPengajuan') {
         const order = ["Ditinjau", "Menunggu Buyer", "Ditolak", "Tanpa Pengajuan"];
@@ -89,10 +93,8 @@ const DataTableRekber = () => {
         const bValue = b[sortConfig.key];
 
         if (sortConfig.key === 'waktuBikinRekber') {
-          // Compare Date objects directly
           return sortConfig.direction === 'ascending' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
         } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-          // Case-insensitive string comparison for others
           if (aValue.toLowerCase() < bValue.toLowerCase()) {
             return sortConfig.direction === 'ascending' ? -1 : 1;
           }
@@ -100,7 +102,6 @@ const DataTableRekber = () => {
             return sortConfig.direction === 'ascending' ? 1 : -1;
           }
         } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-          // Numeric comparison
           return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
         }
         return 0;
@@ -108,7 +109,7 @@ const DataTableRekber = () => {
     }
 
     return sortableItems;
-  }, [initialRekberData, sortConfig, filterConfig]); // Depend on initialRekberData
+  }, [initialRekberData, sortConfig, filterConfig]);
 
 
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
@@ -148,40 +149,34 @@ const DataTableRekber = () => {
       if (sortConfig.direction === 'ascending') {
         direction = 'descending';
       } else {
-        // If already descending, and it's not the current default sort column,
-        // then clicking again reverts to the default time sort.
-        if (key !== 'waktuBikinRekber') { // Only reset if not clicking the time column
-            setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); // Back to default time sort
-            setFilterConfig(null); // Clear category filter
+        if (key !== 'waktuBikinRekber') { 
+            setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); 
+            setFilterConfig(null); 
             setCurrentPage(1);
-            return; // Exit to prevent further processing
+            return; 
         }
-        // If it's the waktuBikinRekber column and already descending, next click makes it ascending
       }
     } else {
-        // If a new sort key is clicked, default direction is ascending
-        // Except for waktuBikinRekber, where default click should be descending (most recent)
         if (key === 'waktuBikinRekber') {
             direction = 'descending';
         }
     }
     
     setSortConfig({ key, direction });
-    setFilterConfig(null); // Clear categorization when sorting
-    setCurrentPage(1); // Reset to first page on sort
+    setFilterConfig(null); 
+    setCurrentPage(1); 
   };
 
   // Function to handle categorization click
   const handleCategoryFilter = (key) => {
-    // If clicking the same filter key again, disable filter and revert to default sort
     if (filterConfig && filterConfig.key === key) {
       setFilterConfig(null);
-      setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); // Revert to default time sort
+      setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); 
     } else {
       setFilterConfig({ key });
-      setSortConfig(null); // Clear sorting when categorizing
+      setSortConfig(null); 
     }
-    setCurrentPage(1); // Reset to first page on filter
+    setCurrentPage(1); 
   };
 
 
@@ -200,6 +195,9 @@ const DataTableRekber = () => {
         return `${baseClasses} bg-blue-500 text-white`;
       case "Menunggu Resi":
         return `${baseClasses} bg-purple-500 text-white`;
+      // Warna disable untuk "Rekber Dibatalkan"
+      case "Rekber Dibatalkan":
+        return `${baseClasses} bg-gray-200 text-gray-700`; // Mirip dengan text-gray-400 tetapi dengan background
       default:
         return `${baseClasses} bg-gray-500 text-white`;
     }
