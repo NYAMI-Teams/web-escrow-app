@@ -10,7 +10,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="manajemenPengguna/pengguna"
+          path="/user"
           element={
               <MainLayout>
                 <Users />
@@ -19,7 +19,7 @@ const AppRoutes = () => {
         />
 
         <Route
-          path="manajemenRekber/Rekber"
+          path="/transaction"
           element={
               <MainLayout>
                 <Transaksi />
