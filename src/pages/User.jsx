@@ -40,13 +40,18 @@ const UserPage = () => {
           </div>
 
           <div className="w-[200px]">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              placeholderText="Tanggal Registrasi"
-              className="w-full h-8 px-2 border border-dimgray rounded-lg text-[13px] font-sf-pro outline-none"
-              dateFormat="dd/MM/yyyy"
-            />
+            <div className="w-full flex flex-col text-left text-[13px] text-darkslategray font-sf-pro">
+              <div className="w-full h-8 flex items-center gap-2 bg-white border border-dimgray rounded-lg overflow-hidden px-2">
+                <CalendarDays className="w-4 h-4 stroke-current" />
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  placeholderText="Tanggal Registrasi"
+                  className="flex-1 h-full bg-transparent outline-none text-[13px] font-sf-pro placeholder-dimgray"
+                  dateFormat="dd/MM/yyyy"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
