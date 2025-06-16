@@ -1,9 +1,13 @@
-import DataTable from "./components/table/DataTableRekber";
-import Login from "./pages/Login";
-import AppRoutes from "./routes/AppRoutes";
+import { BrowserRouter } from "react-router-dom";
+import RekberDetailPage from "./pages/RekberDetailPage";
+import { UserDetail } from "./pages/UserDetail";
 
 function App() {
-  return <AppRoutes />;
+  return (
+    <BrowserRouter>
+      <UserDetail />
+    </BrowserRouter>
+  );
 }
 
 export default App;
