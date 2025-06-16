@@ -3,6 +3,8 @@ import MainLayout from "../layouts/MainLayout";
 import Users from "../pages/User";
 import Transaksi from "../pages/Transaksi";
 import Login from "../pages/Login";
+import { UserDetail } from "../pages/UserDetail";
+import RekberDetailPage from "../pages/RekberDetailPage";
 
 const AppRoutes = () => {
   return (
@@ -10,7 +12,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="manajemenPengguna/pengguna"
+          path="user"
           element={
               <MainLayout>
                 <Users />
@@ -19,11 +21,29 @@ const AppRoutes = () => {
         />
 
         <Route
-          path="manajemenRekber/Rekber"
+          path="user/:userId"
+          element={
+            <MainLayout>
+              <UserDetail />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="transaction"
           element={
               <MainLayout>
                 <Transaksi />
               </MainLayout>
+          }
+        />
+
+        <Route
+          path="transaction/:transactionId"
+          element={
+            <MainLayout>
+              <RekberDetailPage />
+            </MainLayout>
           }
         />
       </Routes>

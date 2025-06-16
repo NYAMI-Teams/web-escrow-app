@@ -1,13 +1,7 @@
-import { BrowserRouter } from "react-router-dom";
-import RekberDetailPage from "./pages/RekberDetailPage";
-import { UserDetail } from "./pages/UserDetail";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <UserDetail />
-    </BrowserRouter>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
