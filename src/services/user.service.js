@@ -1,12 +1,11 @@
-// src/services/transaksi.service.js
+// src/services/user.service.js
 import api from "./api";
 
-export const getAllTransactions = async ({
+export const getAllUsers = async ({
   page,
   limit,
   search,
-  status,
-  fundReleaseStatus,
+  kycStatus,
   createdFrom,
   createdTo,
 }) => {
@@ -14,12 +13,11 @@ export const getAllTransactions = async ({
     page,
     limit,
     ...(search && { search }),
-    ...(status && { status }),
-    ...(fundReleaseStatus && { fundReleaseStatus }),
+    ...(kycStatus && { kycStatus }),
     ...(createdFrom && { createdFrom }),
     ...(createdTo && { createdTo }),
   };
 
-  const res = await api.get("/admin/transactions", { params });
+  const res = await api.get("/admin/users", { params });
   return res.data;
 };
