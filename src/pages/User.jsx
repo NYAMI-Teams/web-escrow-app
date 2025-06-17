@@ -1,65 +1,82 @@
-import React, { useState } from "react";
+// pages/UserPage.jsx
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../components/BreadCrumb";
-import ButtonDropdown from "../components/ButtonDropdown";
-import ButtonFilter from "../components/ButtonFilter";
-import InputSearch from "../components/InputSearch";
-import { Search, CalendarDays } from "lucide-react";
-import DataTableUser from "../components/table/DataTableUser";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { getAllUsers } from "../services/user.service";
+import UserFilters from "../components/UserFilters";
+import UserTable from "../components/UserTable";
+import { useDebounce } from "use-debounce";
 
 const UserPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
+  const [users, setUsers] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [loading, setLoading] = useState(true);
+
+  const [debouncedSearch] = useDebounce(searchQuery, 500);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedStatus("");
+    setSelectedDateRange([null, null]);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const [start, end] = selectedDateRange;
+        const createdFrom = start
+          ? new Date(start.setHours(0, 0, 0, 0)).toISOString()
+          : undefined;
+        const createdTo = end
+          ? new Date(end.setHours(23, 59, 59, 999)).toISOString()
+          : undefined;
+
+        const data = await getAllUsers({
+          page: currentPage,
+          limit: itemsPerPage,
+          search: debouncedSearch,
+          kycStatus: selectedStatus,
+          createdFrom,
+          createdTo,
+        });
+
+        setUsers(data.data);
+        setTotalCount(data.meta.totalCount);
+      } catch (err) {
+        console.error("Gagal ambil data user:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [debouncedSearch, selectedStatus, selectedDateRange, currentPage]);
 
   return (
-    <div className="w-full">
+    <div className='w-full'>
       <Breadcrumb />
-
-      <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-        <div className="max-w-[300px] w-full md:w-auto">
-          <InputSearch
-            Icon={Search}
-            placeholder="Cari ID, nama dan email"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center gap-3 overflow-x-auto">
-          <ButtonFilter />
-
-          <div className="w-[200px]">
-            <ButtonDropdown
-              placeholder="Status Pengguna"
-              options={["Terverifikasi", "Belum"]}
-              value={selectedStatus}
-              onChange={(value) => setSelectedStatus(value)}
-            />
-          </div>
-
-          <div className="w-[200px]">
-            <div className="w-full flex flex-col text-left text-[13px] text-darkslategray font-sf-pro">
-              <div className="w-full h-8 flex items-center gap-2 bg-white border border-dimgray rounded-lg overflow-hidden px-2">
-                <CalendarDays className="w-4 h-4 stroke-current" />
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  placeholderText="Tanggal Registrasi"
-                  className="flex-1 h-full bg-transparent outline-none text-[13px] font-sf-pro placeholder-dimgray"
-                  dateFormat="dd/MM/yyyy"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <DataTableUser
+      <UserFilters
         searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         selectedStatus={selectedStatus}
-        selectedDate={selectedDate}
+        onStatusChange={setSelectedStatus}
+        selectedDateRange={selectedDateRange}
+        onDateChange={setSelectedDateRange}
+        onResetFilters={handleResetFilters}
+      />
+      <UserTable
+        users={users}
+        loading={loading}
+        currentPage={currentPage}
+        totalCount={totalCount}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
       />
     </div>
   );

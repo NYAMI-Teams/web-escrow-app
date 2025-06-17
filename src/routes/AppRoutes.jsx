@@ -3,46 +3,54 @@ import MainLayout from "../layouts/MainLayout";
 import Users from "../pages/User";
 import Transaksi from "../pages/Transaksi";
 import Login from "../pages/Login";
-import { UserDetail } from "../pages/UserDetail";
 import RekberDetailPage from "../pages/RekberDetailPage";
+import ProtectedRoute from "./ProtectedRoute"; // tambahkan ini
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path='/' element={<Login />} />
+
         <Route
-          path="/user"
+          path='/users'
           element={
-            <MainLayout>
-              <Users />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Users />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
-        <Route
+        <Route path='/' element={<Login />} />
+        {/* <Route
           path="/user/detail"
           element={
             <MainLayout>
               <UserDetail/>
             </MainLayout>
           }
-        />
+        /> */}
 
         <Route
-          path="/transactions"
+          path='/transactions'
           element={
-            <MainLayout>
-              <Transaksi />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Transaksi />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
-          path="transactions/:transactionId"
+          path='/transactions/:transactionId'
           element={
-            <MainLayout>
-              <RekberDetailPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <RekberDetailPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>
