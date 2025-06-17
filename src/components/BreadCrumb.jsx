@@ -11,14 +11,14 @@ const Breadcrumb = () => {
   // Mapping segment ke nama item
   const routeNameMap = {
     transactions: "Daftar Transaksi",
-    user: "Daftar User",
+    users: "Daftar User",
     complain: "Daftar Komplain",
   };
 
   // Mapping segment ke menu group
   const parentMenuMap = {
     transactions: "Manajemen Rekber",
-    user: "Manajemen Pengguna",
+    users: "Manajemen Pengguna",
     complain: "Manajemen Komplain",
   };
 

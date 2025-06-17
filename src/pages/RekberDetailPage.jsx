@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import RekberInfoSection from "../components/RekberDetail/RekberInfoSection";
 import TrackingDemo from "../components/RekberDetail/TrackingRekber/TrackingDemo";
 import { BreadcrumbRekber } from "../components/RekberDetail/BreadcrumbRekberDetail";
-import { trackingData } from "../components/RekberDetail/TrackingRekber/trackingData";
+// import { trackingData } from "../components/RekberDetail/TrackingRekber/trackingData";
 import bniLogo from "../assets/bni.png";
 import contohResi from "../assets/contoh-resi.png";
 import buktiPengajuan from "../assets/bukti-pengajuan.png";
 import Breadcrumb from "../components/BreadCrumb";
-import { getTransactionById } from "../services/transaksi.service";
+import {
+  getTransactionById,
+  postFundRelease,
+} from "../services/transaksi.service";
 import { useParams } from "react-router-dom";
 
 // Helper untuk parsing tanggal dari string trackingData
@@ -318,6 +321,8 @@ const mapApiStatusToCurrentStatus = (apiStatus) => {
       return "barangDiterima";
     case "canceled":
       return "rekberBatal";
+    case "fund_release_requested":
+      return "menungguPersetujuanAdmin";
     default:
       return "menungguPembayaran";
   }
@@ -333,7 +338,6 @@ const mapFundReleaseStatus = (requested, status) => {
   return "Tanpa Pengajuan"; // kalau requested false
 };
 
-
 const RekberDetailPage = () => {
   const [currentStatus, setCurrentStatus] = useState("menungguPembayaran");
   const [showKonfirmasi, setShowKonfirmasi] = useState(false);
@@ -343,82 +347,109 @@ const RekberDetailPage = () => {
   const [initialRekberInfo, setInitialRekberInfo] = useState(null);
   const [shippingInfo, setShippingInfo] = useState(null);
   const [submissionInfo, setSubmissionInfo] = useState(null);
+  const [timeInfo, setTimeInfo] = useState(null);
 
   const { transactionId } = useParams();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getTransactionById(transactionId);
-        const item = res.data;
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await getTransactionById(transactionId);
+      const item = res.data;
 
-        setInitialRekberInfo({
-          virtualAccount: item.virtualAccount,
-          transactionId: item.id,
-          productName: item.itemName,
-          bill: {
-            total: `Rp. ${Number(item.totalAmount).toLocaleString("id-ID")},00`,
-            product: `Rp. ${Number(item.itemPrice).toLocaleString("id-ID")},00`,
-            insurance: `Rp. ${Number(item.insuranceFee).toLocaleString(
-              "id-ID"
-            )},00`,
-            serviceFee: `Rp. ${Number(item.platformFee).toLocaleString(
-              "id-ID"
-            )},00`,
+      setInitialRekberInfo({
+        virtualAccount: item.virtualAccount,
+        transactionId: item.id,
+        productName: item.itemName,
+        bill: {
+          total: `Rp. ${Number(item.totalAmount).toLocaleString("id-ID")},00`,
+          product: `Rp. ${Number(item.itemPrice).toLocaleString("id-ID")},00`,
+          insurance: `Rp. ${Number(item.insuranceFee).toLocaleString(
+            "id-ID"
+          )},00`,
+          serviceFee: `Rp. ${Number(item.platformFee).toLocaleString(
+            "id-ID"
+          )},00`,
+        },
+        seller: {
+          email: item.sellerEmail,
+          userId: "RBK-0000001",
+          bank: {
+            name: item.withdrawalBank.bankName,
+            logo: item.withdrawalBank.logoUrl,
+            accountNumber: item.withdrawalBank.accountNumber,
           },
-          seller: {
-            email: item.sellerEmail,
-            userId: "RBK-0000001",
-            bank: {
-              name: item.withdrawalBank.bankName,
-              logo: item.withdrawalBank.logoUrl,
-              accountNumber: item.withdrawalBank.accountNumber,
-            },
-          },
-          buyer: {
-            email: item.buyerEmail,
-            userId: "RBK-0000010",
-            status:
-              item.status === "pending_payment"
-                ? "Belum Transfer"
-                : item.status,
-          },
-        });
+        },
+        buyer: {
+          email: item.buyerEmail,
+          userId: "RBK-0000010",
+          status:
+            item.status === "pending_payment" ? "Belum Transfer" : item.status,
+        },
+      });
 
-        setShippingInfo({
-          noResi: item.shipment.trackingNumber || "null",
-          ekspedisi: item.shipment.courier || "null",
-          buktiFile: {
-            url: item.shipment.photoUrl || contohResi,
-            filename: item.shipment.photoUrl ? "resi.jpg" : "contoh-resi.jpg",
-          },
-        });
+      setTimeInfo({
+        createTime : item.createdAt,
+        paymentTime : item.paidAt,
+        payementDeadline : item.paymentDeadline,
+        shipmentDeadline : item.shipmentDeadline,
+        shipmentTime : item.shipment.shipmentDate,
+        fundReleaseRequestTime : item.fundReleaseRequest.requestedAt,
+        fundReleaseResolveTime : item.fundReleaseRequest.resolvedAt,
+        buyerConfirmDeadline : item.buyerConfirmDeadline,
+        buyerConfirmTime : item.buyerConfirmedAt
+      })
 
-        setSubmissionInfo({
-  alasan: "Barang diterima pembeli dapat dilakukan pencairan dana",
-  noResi: item.shipment.trackingNumber || "null",
-  ekspedisi: item.shipment.courier || "null",
-  buktiFile: {
-    url: item.shipment.photoUrl || buktiPengajuan,
-    filename: item.shipment.photoUrl
-      ? "bukti-pengajuan.jpg"
-      : "contoh-pengajuan.jpg",
-  },
-  statusPengajuan: mapFundReleaseStatus(
-    item.fundReleaseRequest.requested,
-    item.fundReleaseRequest.status
-  ),
-  waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
-});
+      setShippingInfo({
+        noResi: item.shipment.trackingNumber || "null",
+        ekspedisi: item.shipment.courier || "null",
+        buktiFile: {
+          url: item.shipment.photoUrl || contohResi,
+          filename: item.shipment.photoUrl ? "resi.jpg" : "contoh-resi.jpg",
+        },
+      });
 
+      setSubmissionInfo({
+        alasan: "Barang diterima pembeli dapat dilakukan pencairan dana",
+        noResi: item.shipment.trackingNumber || "null",
+        ekspedisi: item.shipment.courier || "null",
+        buktiFile: {
+          url: item.fundReleaseRequest.evidenceUrl || buktiPengajuan,
+          filename: item.fundReleaseRequest.evidenceUrl 
+            ? "bukti-pengajuan.jpg"
+            : "contoh-pengajuan.jpg",
+        },
+        statusPengajuan: mapFundReleaseStatus(
+          item.fundReleaseRequest.requested,
+          item.fundReleaseRequest.status
+        ),
+        waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
+      });
+
+      // Debugging log di sini
+      if (item.status === "completed") {
+        // Prioritaskan status 'completed'
+        setCurrentStatus("barangDiterima");
+      } else if (item.fundReleaseRequest.requested) {
+        const fundStatus = item.fundReleaseRequest.status;
+        const statusMap = {
+          pending: "menungguPersetujuanAdmin",
+          approved: "pengajuanKonfirmasi",
+          rejected: "pengajuanDitolak",
+        };
+        setCurrentStatus(
+          statusMap[fundStatus] || mapApiStatusToCurrentStatus(item.status)
+        );
+      } else {
         setCurrentStatus(mapApiStatusToCurrentStatus(item.status));
-      } catch (error) {
-        console.error("Gagal ambil data transaksi:", error);
       }
-    };
-
-    fetchData();
+    } catch (error) {
+      console.error("Gagal ambil data transaksi:", error);
+    }
   }, [transactionId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (!initialRekberInfo) {
     return (
@@ -429,15 +460,17 @@ const RekberDetailPage = () => {
   }
 
   // Ambil data tracking sesuai status
-  const currentTracking = trackingData[currentStatus];
+  // const currentTracking = trackingData[currentStatus];
 
   // Ambil waktu bikin rekber dan waktu buyer bayar dari step tracking
-  const waktuBikinRekber = currentTracking.steps.find(
-    (s) => s.label === "Waktu bikin rekber"
-  )?.timestamp;
-  const waktuBuyerBayar = currentTracking.steps.find(
-    (s) => s.label === "Waktu buyer bayar"
-  )?.timestamp;
+  // const waktuBikinRekber = currentTracking.steps.find(
+  //   (s) => s.label === "Waktu bikin rekber"
+  // )?.timestamp;
+  // const waktuBuyerBayar = currentTracking.steps.find(
+  //   (s) => s.label === "Waktu buyer bayar"
+  // )?.timestamp;
+  const waktuBikinRekber = timeInfo.createTime;
+  const waktuBuyerBayar = timeInfo.paymentTime;
 
   // Untuk status pengajuan, label dan badge kuning/abu-abu
   let pengajuanBadge = null;
@@ -477,18 +510,20 @@ const RekberDetailPage = () => {
   let deadlineBadge = null;
   if (currentStatus === "menungguPembayaran") {
     deadlineLabel = "Buyer transfer sebelum";
-    deadlineDate = waktuBikinRekber
-      ? new Date(
-          parseDateFromStep(waktuBikinRekber).getTime() + 3 * 60 * 60 * 1000
-        )
-      : null;
+    // deadlineDate = waktuBikinRekber
+    //   ? new Date(
+    //       parseDateFromStep(waktuBikinRekber).getTime() + 3 * 60 * 60 * 1000
+    //     )
+    //   : null;
+    deadlineDate = timeInfo.paymentDeadline
   } else if (currentStatus === "menungguResi") {
     deadlineLabel = "Seller kirim barang sebelum";
-    deadlineDate = waktuBuyerBayar
-      ? new Date(
-          parseDateFromStep(waktuBuyerBayar).getTime() + 2 * 24 * 60 * 60 * 1000
-        )
-      : null;
+    // deadlineDate = waktuBuyerBayar
+    //   ? new Date(
+    //       parseDateFromStep(waktuBuyerBayar).getTime() + 2 * 24 * 60 * 60 * 1000
+    //     )
+    //   : null;
+    deadlineDate = timeInfo.shipmentDeadline
   } else if (currentStatus === "dalamPengiriman") {
     deadlineLabel = "Status pengajuan";
     deadlineDate = null;
@@ -568,16 +603,23 @@ const RekberDetailPage = () => {
     setKonfirmasiType("tolak");
     setShowKonfirmasi(true);
   };
-  const handleKonfirmasi = (isYes) => {
+
+  const handleKonfirmasi = async (isYes) => {
     setShowKonfirmasi(false);
     if (isYes) {
-      if (konfirmasiType === "setuju") {
-        setPengajuanStatus("Diterima");
-        setWaktuAdminSetuju(new Date().toISOString());
-        setCurrentStatus("pengajuanKonfirmasi");
-      } else {
-        setPengajuanStatus("Ditolak");
-        setCurrentStatus("pengajuanDitolak");
+      try {
+        if (konfirmasiType === "setuju") {
+          await postFundRelease(transactionId, "approve");
+          setPengajuanStatus("Diterima");
+          setWaktuAdminSetuju(new Date().toISOString());
+          setCurrentStatus("pengajuanKonfirmasi");
+        } else {
+          await postFundRelease(transactionId, "reject");
+          setPengajuanStatus("Ditolak");
+          setCurrentStatus("pengajuanDitolak");
+        }
+      } catch (error) {
+        console.error("Gagal update status pengajuan:", error);
       }
     }
   };
@@ -601,6 +643,7 @@ const RekberDetailPage = () => {
           <TrackingDemo
             currentStatus={currentStatus}
             setCurrentStatus={setCurrentStatus}
+            timeInfo={timeInfo}
           />
         </div>
         <div className="space-y-6">

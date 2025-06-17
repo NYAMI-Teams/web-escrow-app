@@ -21,3 +21,8 @@ export const getAllUsers = async ({
   const res = await api.get("/admin/users", { params });
   return res.data;
 };
+
+export const getUserById = async (usersId) => {
+  const res = await api.get(`/admin/users/${usersId}`);
+  return res.data;
+};

@@ -28,3 +28,10 @@ export const getTransactionById = async (transactionId) => {
   const res = await api.get(`/admin/transactions/${transactionId}`);
   return res.data;
 };
+
+export const postFundRelease = async (transactionId, action) => {
+  const res = await api.post(
+    `/admin/transactions/${transactionId}/fund-release/${action}`
+  );
+  return res.data;
+};

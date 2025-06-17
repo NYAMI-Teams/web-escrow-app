@@ -5,6 +5,7 @@ import Transaksi from "../pages/Transaksi";
 import Login from "../pages/Login";
 import RekberDetailPage from "../pages/RekberDetailPage";
 import ProtectedRoute from "./ProtectedRoute"; // tambahkan ini
+import { UserDetail } from "../pages/UserDetail";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,16 @@ const AppRoutes = () => {
             <ProtectedRoute>
               <MainLayout>
                 <Users />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/users/:usersId'
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <UserDetail/>
               </MainLayout>
             </ProtectedRoute>
           }
