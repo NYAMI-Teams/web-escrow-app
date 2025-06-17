@@ -22,6 +22,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route path='/' element={<Login />} />
+        {/* <Route
+          path="/user/detail"
+          element={
+            <MainLayout>
+              <UserDetail/>
+            </MainLayout>
+          }
+        /> */}
 
         <Route
           path='/transactions'

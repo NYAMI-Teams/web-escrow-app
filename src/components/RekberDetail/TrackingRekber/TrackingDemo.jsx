@@ -43,7 +43,7 @@ const TrackingDemo = ({ currentStatus, setCurrentStatus }) => {
     return (
         <div className="flex flex-col gap-6 p-6">
             {/* Status Selector */}
-            <div className="flex flex-wrap gap-2">
+            {/* <div className="flex flex-wrap gap-2">
                 {Object.keys(trackingData).map((status) => (
                     <button
                         key={status}
@@ -56,7 +56,7 @@ const TrackingDemo = ({ currentStatus, setCurrentStatus }) => {
                         {statusLabels[status]}
                     </button>
                 ))}
-            </div>
+            </div> */}
 
             {/* Warning Badge */}
             <div className="mb-4">
@@ -86,7 +86,7 @@ const TrackingDemo = ({ currentStatus, setCurrentStatus }) => {
                 </div>
             </div>
 
-            <div className="mt-6 space-x-2">
+            {/* <div className="mt-6 space-x-2">
                 <button
                     onClick={handleNextStatus}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${currentStatus === 'rekberBatal' || currentStatus === 'barangDiterima'
@@ -113,7 +113,7 @@ const TrackingDemo = ({ currentStatus, setCurrentStatus }) => {
                         Tolak Pengajuan
                     </button>
                 )}
-            </div>
+            </div> */}
         </div>
     );
 };

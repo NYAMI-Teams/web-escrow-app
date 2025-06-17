@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { ArrowRightIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const mapStatusToUI = (apiStatus) => {
   const map = {
@@ -90,6 +91,7 @@ const TransactionTable = ({
   onPageChange,
 }) => {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const navigate = useNavigate();
 
   return (
     <div className='flex w-full justify-center p-4'>
@@ -220,7 +222,10 @@ const TransactionTable = ({
                     </TableCell>
 
                     <TableCell className='text-center'>
-                      <ArrowRightIcon className='w-4 h-4 text-[#5c5c5c] hover:text-blue-600 cursor-pointer' />
+                      <ArrowRightIcon
+                        className='w-4 h-4 text-[#5c5c5c] hover:text-blue-600 cursor-pointer'
+                        onClick={() => navigate(`/transactions/${txn.id}`)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
