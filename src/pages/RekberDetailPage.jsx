@@ -384,6 +384,7 @@ const RekberDetailPage = () => {
           userId: "RBK-0000010",
           status:
             item.status === "pending_payment" ? "Belum Transfer" : item.status,
+            
         },
       });
 
@@ -580,18 +581,18 @@ const RekberDetailPage = () => {
 
   // Siapkan info yang akan di-pass ke RekberInfoSection
   const infoProps = {
-    ...initialRekberInfo,
-    seller: {
-      ...initialRekberInfo.seller,
-      bank: sellerBank,
-    },
-    buyer: buyerObj,
     deadlineLabel,
     deadlineDate,
-    currentStatus,
+    seller : initialRekberInfo.seller,
+    buyer : initialRekberInfo.buyer,
+    virtualAccount : initialRekberInfo.virtualAccount,
+    transactionId : initialRekberInfo.transactionId,
+    productName : initialRekberInfo.productName,
+    bill: initialRekberInfo.bill,
     pengajuanBadge,
     deadlineBadge,
-    buyerKonfirmasiDeadline,
+    currentStatus,
+    buyerKonfirmasiDeadline
   };
 
   // Untuk status pengajuan konfirmasi
