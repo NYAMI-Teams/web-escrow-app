@@ -1,81 +1,94 @@
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../components/BreadCrumb";
-import ButtonDropdown from "../components/ButtonDropdown";
-import ButtonFilter from "../components/ButtonFilter";
-import InputSearch from "../components/InputSearch";
-import { Search, CalendarDays } from "lucide-react";
-import DataTableRekber from "../components/table/DataTableRekber";
-import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import ButtonMultiDropdown from "../components/ButtonMultiDropdown";
+import { getAllTransactions } from "../services/transaksi.service";
+import TransactionFilters from "../components/TransactionFilters";
+import TransactionTable from "../components/TransactionTable";
+import { useDebounce } from "use-debounce";
 
 const TransaksiPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedStatusRekber, setSelectedStatusRekber] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState([]);
+  const [selectedFundStatus, setSelectedFundStatus] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
+  const [transactions, setTransactions] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [loading, setLoading] = useState(true);
+
+  const [debouncedSearch] = useDebounce(searchQuery, 500);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedStatus([]);
+    setSelectedFundStatus("");
+    setSelectedDateRange([null, null]);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        const [start, end] = selectedDateRange;
+        const createdFrom = start
+          ? new Date(start.setHours(0, 0, 0, 0)).toISOString()
+          : undefined;
+        const createdTo = end
+          ? new Date(end.setHours(23, 59, 59, 999)).toISOString()
+          : undefined;
+
+        const data = await getAllTransactions({
+          page: currentPage,
+          limit: itemsPerPage,
+          search: debouncedSearch,
+          status: selectedStatus.length > 0 ? selectedStatus : undefined,
+          fundReleaseStatus: selectedFundStatus,
+          createdFrom,
+          createdTo,
+        });
+
+        setTransactions(data.data);
+        setTotalCount(data.meta.totalCount);
+      } catch (err) {
+        console.error("Gagal ambil data transaksi:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [
+    debouncedSearch,
+    selectedStatus,
+    selectedFundStatus,
+    selectedDateRange,
+    currentPage,
+  ]);
+
   return (
-    <div>
-  <Breadcrumb />
-  
-  {/* Filter Section */}
-  <div className="mb-4">
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="max-w-[300px] w-full md:w-auto">
-        <InputSearch Icon={Search} placeholder="Cari ID, nama dan email" />
-      </div>
-
-      <div className="flex gap-3 overflow-x-auto flex-wrap">
-        <ButtonFilter />
-        <div className="w-[300px]">
-          <ButtonMultiDropdown
-            placeholder="Status Rekber"
-            options={[
-              "Menunggu Pembayaran",
-              "Menunggu Resi",
-              "Dalam Pengiriman",
-              "Barang Diterima Buyer",
-              "Pengembalian",
-            ]}
-            value={selectedStatusRekber}
-            onChange={setSelectedStatusRekber}
-          />
-        </div>
-        <div className="w-[300px]">
-          <ButtonDropdown
-            placeholder="Status Pengajuan"
-            options={[
-              "Ditinjau",
-              "Tanpa Pengajuan",
-              "Menunggu Buyer",
-              "Ditolak",
-            ]}
-            value={selectedStatus}
-            onChange={(value) => setSelectedStatus(value)}
-          />
-        </div>
-        <div className="w-[200px]">
-          <div className="w-full flex flex-col text-left text-[13px] text-darkslategray font-sf-pro">
-            <div className="w-full h-8 flex items-center gap-2 bg-white border border-dimgray rounded-lg overflow-hidden px-2">
-              <CalendarDays className="w-4 h-4 stroke-current" />
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                placeholderText="Tanggal Registrasi"
-                className="flex-1 h-full bg-transparent outline-none text-[13px] font-sf-pro placeholder-dimgray"
-                dateFormat="dd/MM/yyyy"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className='w-full'>
+      <Breadcrumb />
+      <TransactionFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+        selectedFundStatus={selectedFundStatus}
+        onFundStatusChange={setSelectedFundStatus}
+        selectedDateRange={selectedDateRange}
+        onDateChange={setSelectedDateRange}
+        onResetFilters={handleResetFilters}
+      />
+      <TransactionTable
+        transactions={transactions}
+        loading={loading}
+        currentPage={currentPage}
+        totalCount={totalCount}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
-  </div>
-
-  {/* Data Table Section */}
-  <div>
-    <DataTableRekber />
-  </div>
-</div>
   );
 };
 
