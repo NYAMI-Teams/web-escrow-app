@@ -1,12 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { UsersRound, Activity, Shuffle, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    navigate("/", { replace: true });
   };
 
   const renderNavItem = (path, icon, label, badgeCount) => {
