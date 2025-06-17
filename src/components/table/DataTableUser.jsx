@@ -10,6 +10,7 @@ import {
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon } from "lucide-react"; // Import icons
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../../store/userStore";
 
 const DataTableUser = () => {
   // Helper to format Date object to your desired string format for display
@@ -180,6 +181,11 @@ const DataTableUser = () => {
   const handleViewDetail = (id) => {
     navigate(`/user/${id}`);
   };
+
+  const { setUserCount } = useUserStore();
+  useEffect(() => {
+    setUserCount(initialUserData.length);
+  }, [initialUserData]);
 
   return (
     <div className="flex w-full justify-center p-4">

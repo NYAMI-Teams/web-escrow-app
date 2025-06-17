@@ -1,8 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { UsersRound, Activity, Shuffle } from "lucide-react";
+import useRekberStore from "../store/rekberStore";
+import useUserStore from "../store/userStore";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { rekberCount } = useRekberStore();
+  const { userCount } = useUserStore();
 
   // Helper render link item
   const renderNavItem = (path, icon, label, badgeCount) => {
@@ -54,17 +58,17 @@ const Sidebar = () => {
           "/user",
           <UsersRound className="w-4 h-4 stroke-current" />,
           "User",
-          99
+          userCount
         )}
 
         <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
           Manajemen Rekber
         </b>
         {renderNavItem(
-          "/transaction",
+          "/transactions",
           <Activity className="w-4 h-4 stroke-current" />,
           "Transaksi",
-          99
+          rekberCount
         )}
 
         <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
