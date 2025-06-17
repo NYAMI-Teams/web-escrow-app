@@ -1,25 +1,47 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import Dashboard from "../pages/Dashboard";
-import Users from "../pages/Users";
+import Users from "../pages/User";
+import Transaksi from "../pages/Transaksi";
+import Login from "../pages/Login";
+import { UserDetail } from "../pages/UserDetail";
+import RekberDetailPage from "../pages/RekberDetailPage";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Login />} />
         <Route
-          path='/'
+          path="/user"
           element={
             <MainLayout>
-              <Dashboard />
+              <Users />
             </MainLayout>
           }
         />
         <Route
-          path='/users'
+          path="/user/detail"
           element={
             <MainLayout>
-              <Users />
+              <UserDetail/>
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/transactions"
+          element={
+            <MainLayout>
+              <Transaksi />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="transactions/:transactionId"
+          element={
+            <MainLayout>
+              <RekberDetailPage />
             </MainLayout>
           }
         />

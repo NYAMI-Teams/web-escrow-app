@@ -1,8 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { UsersRound, Activity, Shuffle } from "lucide-react";
+import useRekberStore from "../store/rekberStore";
+import useUserStore from "../store/userStore";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { rekberCount } = useRekberStore();
+  const { userCount } = useUserStore();
 
   // Helper render link item
   const renderNavItem = (path, icon, label, badgeCount) => {
@@ -32,7 +36,6 @@ const Sidebar = () => {
             <div className="rounded bg-[#e5e5e5] h-[20px] flex items-center justify-center py-0.5 px-2 text-[11px] text-dimgray ml-auto">
               <div className="relative leading-[17px]">{badgeCount}</div>
             </div>
-            
           )}
         </Link>
       );
@@ -48,27 +51,33 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-2 text-[12px] font-sf-pro w-full">
-        <b className="px-6 mb-1 text-base text-darkslateblue">Manajemen Pengguna</b>
+        <b className="px-6 mb-1 text-base text-darkslateblue">
+          Manajemen Pengguna
+        </b>
         {renderNavItem(
-          "/",
+          "/user",
           <UsersRound className="w-4 h-4 stroke-current" />,
-          "Dashboard",
-          99
+          "User",
+          userCount
         )}
 
-        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Manajemen Rekber</b>
+        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
+          Manajemen Rekber
+        </b>
         {renderNavItem(
-          "/users",
+          "/transactions",
           <Activity className="w-4 h-4 stroke-current" />,
-          "Users",
-          99
+          "Transaksi",
+          rekberCount
         )}
 
-        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Dispute Center</b>
+        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">
+          Manajemen Komplain
+        </b>
         {renderNavItem(
           "/dispute",
           <Shuffle className="w-4 h-4 stroke-current" />,
-          "Dispute"
+          "Komplain"
         )}
       </nav>
     </div>
