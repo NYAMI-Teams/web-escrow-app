@@ -312,7 +312,7 @@ const mapApiStatusToCurrentStatus = (apiStatus) => {
       return "menungguPembayaran";
     case "waiting_shipment":
       return "menungguResi";
-    case "shipping":
+    case "shipped":
       return "dalamPengiriman";
     case "completed":
       return "barangDiterima";
@@ -322,6 +322,17 @@ const mapApiStatusToCurrentStatus = (apiStatus) => {
       return "menungguPembayaran";
   }
 };
+
+const mapFundReleaseStatus = (requested, status) => {
+  if (requested) {
+    // Kalau ada request pencairan
+    if (status === "approved") return "Diterima";
+    if (status === "rejected") return "Ditolak";
+    return "Diajukan"; // default kalau requested true tapi statusnya belum approved/rejected
+  }
+  return "Tanpa Pengajuan"; // kalau requested false
+};
+
 
 const RekberDetailPage = () => {
   const [currentStatus, setCurrentStatus] = useState("menungguPembayaran");
@@ -384,27 +395,23 @@ const RekberDetailPage = () => {
         });
 
         setSubmissionInfo({
-          alasan: "Barang diterima pembeli dapat dilakukan pencairan dana",
-          noResi: item.shipment.trackingNumber || "null",
-          ekspedisi: item.shipment.courier || "null",
-          buktiFile: {
-            url: item.shipment.photoUrl || buktiPengajuan,
-            filename: item.shipment.photoUrl
-              ? "bukti-pengajuan.jpg"
-              : "contoh-pengajuan.jpg",
-          },
-          statusPengajuan:
-            item.fundReleaseRequest.requested === false
-              ? "Belum Diajukan"
-              : item.fundReleaseRequest.status || "null",
-          waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
-          
-          
-        });
+  alasan: "Barang diterima pembeli dapat dilakukan pencairan dana",
+  noResi: item.shipment.trackingNumber || "null",
+  ekspedisi: item.shipment.courier || "null",
+  buktiFile: {
+    url: item.shipment.photoUrl || buktiPengajuan,
+    filename: item.shipment.photoUrl
+      ? "bukti-pengajuan.jpg"
+      : "contoh-pengajuan.jpg",
+  },
+  statusPengajuan: mapFundReleaseStatus(
+    item.fundReleaseRequest.requested,
+    item.fundReleaseRequest.status
+  ),
+  waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
+});
 
         setCurrentStatus(mapApiStatusToCurrentStatus(item.status));
-
-        
       } catch (error) {
         console.error("Gagal ambil data transaksi:", error);
       }
@@ -421,7 +428,10 @@ const RekberDetailPage = () => {
     );
   }
 
+  // Ambil data tracking sesuai status
   const currentTracking = trackingData[currentStatus];
+
+  // Ambil waktu bikin rekber dan waktu buyer bayar dari step tracking
   const waktuBikinRekber = currentTracking.steps.find(
     (s) => s.label === "Waktu bikin rekber"
   )?.timestamp;
@@ -429,10 +439,10 @@ const RekberDetailPage = () => {
     (s) => s.label === "Waktu buyer bayar"
   )?.timestamp;
 
+  // Untuk status pengajuan, label dan badge kuning/abu-abu
   let pengajuanBadge = null;
   let effectivePengajuanStatus = pengajuanStatus;
   let buyerKonfirmasiDeadline = null;
-
   if (currentStatus === "menungguPersetujuanAdmin") {
     effectivePengajuanStatus = "Permintaan Ditinjau";
   } else if (currentStatus === "pengajuanKonfirmasi" && waktuAdminSetuju) {
@@ -441,15 +451,14 @@ const RekberDetailPage = () => {
       new Date(waktuAdminSetuju).getTime() + 24 * 60 * 60 * 1000
     );
   }
-
   if (
     ["menungguPersetujuanAdmin", "pengajuanDitolak"].includes(currentStatus)
   ) {
-    pengajuanBadge = (
+    pengajuanBadge = effectivePengajuanStatus ? (
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
         {effectivePengajuanStatus}
       </span>
-    );
+    ) : null;
   } else if (currentStatus === "pengajuanKonfirmasi") {
     pengajuanBadge = (
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -463,11 +472,9 @@ const RekberDetailPage = () => {
       </span>
     );
   }
-
   let deadlineLabel = "Buyer transfer sebelum";
   let deadlineDate = null;
   let deadlineBadge = null;
-
   if (currentStatus === "menungguPembayaran") {
     deadlineLabel = "Buyer transfer sebelum";
     deadlineDate = waktuBikinRekber
@@ -479,7 +486,7 @@ const RekberDetailPage = () => {
     deadlineLabel = "Seller kirim barang sebelum";
     deadlineDate = waktuBuyerBayar
       ? new Date(
-          parseDateFromStep(waktuBikinRekber).getTime() + 3 * 60 * 60 * 1000
+          parseDateFromStep(waktuBuyerBayar).getTime() + 2 * 24 * 60 * 60 * 1000
         )
       : null;
   } else if (currentStatus === "dalamPengiriman") {
@@ -514,11 +521,13 @@ const RekberDetailPage = () => {
       : null;
   }
 
+  // Seller rekening berbeda untuk menungguResi (contoh)
   const sellerBank =
     currentStatus === "menungguResi"
       ? { name: "BNI", logo: bniLogo, accountNumber: "1234567890" }
       : initialRekberInfo.seller.bank;
 
+  // Buyer rekening hanya untuk menungguResi, dalamPengiriman, menungguPersetujuanAdmin, pengajuanKonfirmasi, pengajuanDitolak, barangDiterima
   const buyerObj = [
     "menungguResi",
     "dalamPengiriman",
@@ -534,9 +543,13 @@ const RekberDetailPage = () => {
       }
     : initialRekberInfo.buyer;
 
+  // Siapkan info yang akan di-pass ke RekberInfoSection
   const infoProps = {
     ...initialRekberInfo,
-    seller: { ...initialRekberInfo.seller, bank: sellerBank },
+    seller: {
+      ...initialRekberInfo.seller,
+      bank: sellerBank,
+    },
     buyer: buyerObj,
     deadlineLabel,
     deadlineDate,
@@ -546,6 +559,7 @@ const RekberDetailPage = () => {
     buyerKonfirmasiDeadline,
   };
 
+  // Untuk status pengajuan konfirmasi
   const handleSetuju = () => {
     setKonfirmasiType("setuju");
     setShowKonfirmasi(true);
@@ -568,18 +582,16 @@ const RekberDetailPage = () => {
     }
   };
 
-  const showSubmission = [
-    "menungguPersetujuanAdmin",
-    "pengajuanKonfirmasi",
-    "pengajuanDitolak",
-  ].includes(currentStatus);
-
+  // Untuk status menungguPersetujuanAdmin dan pengajuanKonfirmasi/pengajuanDitolak
+  const showSubmission =
+    currentStatus === "menungguPersetujuanAdmin" ||
+    currentStatus === "pengajuanKonfirmasi" ||
+    currentStatus === "pengajuanDitolak";
   const submissionProps = {
     ...submissionInfo,
     statusPengajuan: pengajuanStatus,
     waktuAdminSetuju,
   };
-
 
   return (
     <div className="w-full">

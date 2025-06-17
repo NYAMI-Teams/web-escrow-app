@@ -15,7 +15,7 @@ const mapStatusToUI = (apiStatus) => {
     pending_payment: "Menunggu Pembayaran",
     waiting_shipment: "Menunggu Resi",
     shipped: "Dalam Pengiriman",
-    completed: "Barang Diterima",
+    completed: "Transaksi Selesai",
     refunded: "Pengembalian",
     canceled: "Dibatalkan",
   };
