@@ -32,7 +32,7 @@ const Sidebar = () => {
             <div className="rounded bg-[#e5e5e5] h-[20px] flex items-center justify-center py-0.5 px-2 text-[11px] text-dimgray ml-auto">
               <div className="relative leading-[17px]">{badgeCount}</div>
             </div>
-            
+
           )}
         </Link>
       );
@@ -64,12 +64,24 @@ const Sidebar = () => {
           99
         )}
 
-        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Dispute Center</b>
-        {renderNavItem(
-          "/dispute",
-          <Shuffle className="w-4 h-4 stroke-current" />,
-          "Dispute"
-        )}
+        <b className="px-6 mt-4 mb-1 text-base text-darkslateblue">Complain</b>
+        <div className="pl-4 flex flex-col gap-1">
+          {renderNavItem(
+            "/barang-hilang",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Hilang"
+          )}
+          {renderNavItem(
+            "/barang-rusak",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Rusak"
+          )}
+          {renderNavItem(
+            "/barang-ga-sesuai",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Ga Sesuai"
+          )}
+        </div>
       </nav>
     </div>
   );
