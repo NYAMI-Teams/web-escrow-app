@@ -47,8 +47,8 @@
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.8",
-    "zustand": "^5.0.5",
-    "use-debounce": "^10.0.5"
+    "use-debounce": "^10.0.5",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

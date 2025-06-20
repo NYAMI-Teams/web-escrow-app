@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import Dashboard from "../pages/Dashboard";
-import Users from "../pages/Users";
+import User from "../pages/User";
 import BarangHilangPage from "../pages/BarangHilangPage";
 import DetailBarangHilangPage from "../pages/DetailBarangHilangPage";
 import BarangRusakPage from "../pages/BarangRusakPage";
@@ -25,7 +24,7 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Users />
+                <User />
               </MainLayout>
             </ProtectedRoute>
           }
@@ -35,7 +34,7 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <UserDetail/>
+                <UserDetail />
               </MainLayout>
             </ProtectedRoute>
           }
