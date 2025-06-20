@@ -9,56 +9,72 @@ import {
   TableRow,
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon } from "lucide-react"; // Import icons
+import { getAllTransactions } from "../../services/transaksi.service";
+import { useNavigate } from "react-router-dom";
+import useRekberStore from "../../store/rekberStore";
+
+const mapStatusToUI = (apiStatus) => {
+  const map = {
+    pending_payment: "Menunggu Pembayaran",
+    waiting_shipment: "Menunggu Resi",
+    shipped: "Dalam Pengiriman",
+    completed: "Barang Diterima Buyer",
+    refunded: "Pengembalian",
+  };
+  return map[apiStatus] || apiStatus;
+};
+
+const mapFundStatusToUI = (apiStatus) => {
+  const map = {
+    pending: "Ditinjau",
+    rejected: "Ditolak",
+    approved: "Menunggu Buyer",
+    none: "Tanpa Pengajuan",
+  };
+  return map[apiStatus] || "Tanpa Pengajuan";
+};
 
 const DataTableRekber = () => {
   // Helper to format Date object to your desired string format for display
   const formatDateTimeForDisplay = (dateObj) => {
-    if (!dateObj) return '';
-    const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    if (!dateObj) return "";
+    const formattedDate = dateObj.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const formattedTime = dateObj.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     return `${formattedDate}, ${formattedTime}`;
   };
 
-  // Initial data generation (done only once on component mount)
-  const [initialRekberData] = useState(() => {
-    // Tambahkan "Rekber Dibatalkan" ke daftar status yang mungkin
-    const statuses = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian", "Rekber Dibatalkan"];
+  const [initialRekberData, setInitialRekberData] = useState([]);
 
-    const generatedData = Array.from({ length: 30 }, (_, i) => {
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-
-      let pengajuanStatus;
-      // Jika status Rekber "Dalam Pengiriman", pilih dari opsi pengajuan
-      // Jika status Rekber "Rekber Dibatalkan", secara otomatis "Tanpa Pengajuan"
-      // Untuk status Rekber lainnya, juga "Tanpa Pengajuan"
-      if (randomStatus === "Dalam Pengiriman") {
-        const pengajuanOptions = ["Ditolak", "Ditinjau", "Tanpa Pengajuan", "Menunggu Buyer"];
-        pengajuanStatus = pengajuanOptions[Math.floor(Math.random() * pengajuanOptions.length)];
-      } else if (randomStatus === "Rekber Dibatalkan") {
-        pengajuanStatus = "Tanpa Pengajuan"; // Pasti "Tanpa Pengajuan" jika Rekber Dibatalkan
-      } else {
-        pengajuanStatus = "Tanpa Pengajuan"; // Status lain selalu "Tanpa Pengajuan"
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getAllTransactions();
+        const apiData = res.data.map((item) => ({
+          id: item.id,
+          idTransaksi: item.transactionCode,
+          waktuBikinRekber: new Date(item.createdAt),
+          namaBarang: item.itemName,
+          pembeliEmail: item.buyerEmail,
+          penjualEmail: item.sellerEmail,
+          nominalTransaksi: item.totalAmount,
+          statusRekber: mapStatusToUI(item.status), // konversi dari API ke UI-friendly label
+          kolomPengajuan: mapFundStatusToUI(item.fundReleaseStatus), // handle nullable
+        }));
+        setInitialRekberData(apiData);
+      } catch (error) {
+        console.error("Gagal ambil data transaksi:", error);
       }
+    };
 
-      // Generate random time for "Waktu Bikin Rekber"
-      const now = new Date();
-      const randomOffsetSeconds = Math.floor(Math.random() * (60 * 24 * 60 * 60)); 
-      const randomDate = new Date(now.getTime() - (randomOffsetSeconds * 1000));
-
-      return {
-        idTransaksi: `TRX-${1000000 + i}`,
-        waktuBikinRekber: randomDate, 
-        namaBarang: `Produk XYZ ${i % 2 === 0 ? 'yang sangat panjang sekali agar bisa melihat fitur truncation berjalan dengan baik' : ''} ${i + 1}`,
-        pembeliEmail: `buyer${i + 1}@email.com${i % 5 === 0 ? 'verylongbuyeremailforcapturingtruncation@example.com' : ''}`,
-        penjualEmail: `seller${i + 1}@email.com${i % 5 === 0 ? 'verylongselleremailforcapturingtruncation@example.com' : ''}`,
-        nominalTransaksi: (1500000 + i * 50000),
-        statusRekber: randomStatus,
-        kolomPengajuan: pengajuanStatus,
-      };
-    });
-
-    return generatedData; 
-  });
+    fetchData();
+  }, []);
 
   const [selectAll, setSelectAll] = useState(false);
   const [checkedItems, setCheckedItems] = useState({});
@@ -66,23 +82,41 @@ const DataTableRekber = () => {
   const itemsPerPage = 10;
 
   // Default sortConfig: sort by waktuBikinRekber, descending (recent first)
-  const [sortConfig, setSortConfig] = useState({ key: 'waktuBikinRekber', direction: 'descending' });
+  const [sortConfig, setSortConfig] = useState({
+    key: "waktuBikinRekber",
+    direction: "descending",
+  });
   const [filterConfig, setFilterConfig] = useState(null);
-
 
   // Memoize filtered and sorted data for performance
   const processedData = useMemo(() => {
-    let sortableItems = [...initialRekberData]; 
+    let sortableItems = [...initialRekberData]; // Use initial data as base
 
     // Apply categorization/grouping first if active
     if (filterConfig) {
-      if (filterConfig.key === 'statusRekber') {
-        // Tambahkan "Rekber Dibatalkan" ke urutan kategorisasi Status Rekber
-        const order = ["Menunggu Pembayaran", "Menunggu Resi", "Dalam Pengiriman", "Barang Diterima Buyer", "Pengembalian", "Rekber Dibatalkan"];
-        sortableItems.sort((a, b) => order.indexOf(a.statusRekber) - order.indexOf(b.statusRekber));
-      } else if (filterConfig.key === 'kolomPengajuan') {
-        const order = ["Ditinjau", "Menunggu Buyer", "Ditolak", "Tanpa Pengajuan"];
-        sortableItems.sort((a, b) => order.indexOf(a.kolomPengajuan) - order.indexOf(b.kolomPengajuan));
+      if (filterConfig.key === "statusRekber") {
+        const order = [
+          "Menunggu Pembayaran",
+          "Menunggu Resi",
+          "Dalam Pengiriman",
+          "Barang Diterima Buyer",
+          "Pengembalian",
+        ];
+        sortableItems.sort(
+          (a, b) =>
+            order.indexOf(a.statusRekber) - order.indexOf(b.statusRekber)
+        );
+      } else if (filterConfig.key === "kolomPengajuan") {
+        const order = [
+          "Ditinjau",
+          "Menunggu Buyer",
+          "Ditolak",
+          "Tanpa Pengajuan",
+        ];
+        sortableItems.sort(
+          (a, b) =>
+            order.indexOf(a.kolomPengajuan) - order.indexOf(b.kolomPengajuan)
+        );
       }
     }
 
@@ -92,29 +126,37 @@ const DataTableRekber = () => {
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
 
-        if (sortConfig.key === 'waktuBikinRekber') {
-          return sortConfig.direction === 'ascending' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
-        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+        if (sortConfig.key === "waktuBikinRekber") {
+          // Compare Date objects directly
+          return sortConfig.direction === "ascending"
+            ? aValue.getTime() - bValue.getTime()
+            : bValue.getTime() - aValue.getTime();
+        } else if (typeof aValue === "string" && typeof bValue === "string") {
+          // Case-insensitive string comparison for others
           if (aValue.toLowerCase() < bValue.toLowerCase()) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
+            return sortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aValue.toLowerCase() > bValue.toLowerCase()) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
+            return sortConfig.direction === "ascending" ? 1 : -1;
           }
-        } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
+        } else if (typeof aValue === "number" && typeof bValue === "number") {
+          // Numeric comparison
+          return sortConfig.direction === "ascending"
+            ? aValue - bValue
+            : bValue - aValue;
         }
         return 0;
       });
     }
 
     return sortableItems;
-  }, [initialRekberData, sortConfig, filterConfig]);
-
+  }, [initialRekberData, sortConfig, filterConfig]); // Depend on initialRekberData
 
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
-  const currentItems = processedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
+  const currentItems = processedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Update selectAll state based on checkedItems of the current page
   useEffect(() => {
@@ -144,45 +186,52 @@ const DataTableRekber = () => {
 
   // Function to handle sorting click
   const handleSort = (key) => {
-    let direction = 'ascending';
+    let direction = "ascending";
     if (sortConfig && sortConfig.key === key) {
-      if (sortConfig.direction === 'ascending') {
-        direction = 'descending';
+      if (sortConfig.direction === "ascending") {
+        direction = "descending";
       } else {
-        if (key !== 'waktuBikinRekber') { 
-            setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); 
-            setFilterConfig(null); 
-            setCurrentPage(1);
-            return; 
+        // If already descending, and it's not the current default sort column,
+        // then clicking again reverts to the default time sort.
+        if (key !== "waktuBikinRekber") {
+          // Only reset if not clicking the time column
+          setSortConfig({ key: "waktuBikinRekber", direction: "descending" }); // Back to default time sort
+          setFilterConfig(null); // Clear category filter
+          setCurrentPage(1);
+          return; // Exit to prevent further processing
         }
+        // If it's the waktuBikinRekber column and already descending, next click makes it ascending
       }
     } else {
-        if (key === 'waktuBikinRekber') {
-            direction = 'descending';
-        }
+      // If a new sort key is clicked, default direction is ascending
+      // Except for waktuBikinRekber, where default click should be descending (most recent)
+      if (key === "waktuBikinRekber") {
+        direction = "descending";
+      }
     }
-    
+
     setSortConfig({ key, direction });
-    setFilterConfig(null); 
-    setCurrentPage(1); 
+    setFilterConfig(null); // Clear categorization when sorting
+    setCurrentPage(1); // Reset to first page on sort
   };
 
   // Function to handle categorization click
   const handleCategoryFilter = (key) => {
+    // If clicking the same filter key again, disable filter and revert to default sort
     if (filterConfig && filterConfig.key === key) {
       setFilterConfig(null);
-      setSortConfig({ key: 'waktuBikinRekber', direction: 'descending' }); 
+      setSortConfig({ key: "waktuBikinRekber", direction: "descending" }); // Revert to default time sort
     } else {
       setFilterConfig({ key });
-      setSortConfig(null); 
+      setSortConfig(null); // Clear sorting when categorizing
     }
-    setCurrentPage(1); 
+    setCurrentPage(1); // Reset to first page on filter
   };
-
 
   // Helper function to get status badge classes (with "huge fill" style)
   const getStatusRekberClass = (status) => {
-    const baseClasses = "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[0.65rem] font-semibold tracking-wide whitespace-nowrap";
+    const baseClasses =
+      "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[0.65rem] font-semibold tracking-wide whitespace-nowrap";
 
     switch (status) {
       case "Dalam Pengiriman":
@@ -195,9 +244,6 @@ const DataTableRekber = () => {
         return `${baseClasses} bg-blue-500 text-white`;
       case "Menunggu Resi":
         return `${baseClasses} bg-purple-500 text-white`;
-      // Warna disable untuk "Rekber Dibatalkan"
-      case "Rekber Dibatalkan":
-        return `${baseClasses} bg-gray-200 text-gray-700`; // Mirip dengan text-gray-400 tetapi dengan background
       default:
         return `${baseClasses} bg-gray-500 text-white`;
     }
@@ -220,26 +266,35 @@ const DataTableRekber = () => {
   };
 
   // Helper to get arrow icon and rotation
-  const getArrowIcon = (key, type = 'sort') => {
-    if (type === 'sort' && sortConfig && sortConfig.key === key) {
+  const getArrowIcon = (key, type = "sort") => {
+    if (type === "sort" && sortConfig && sortConfig.key === key) {
       return (
         <ChevronDownIcon
           className={`w-3 h-3 text-[#5c5c5c] transition-transform duration-200 ${
-            sortConfig.direction === 'ascending' ? 'rotate-180' : ''
+            sortConfig.direction === "ascending" ? "rotate-180" : ""
           }`}
         />
       );
     }
-    if (type === 'filter' && filterConfig && filterConfig.key === key) {
-        return <ChevronDownIcon className="w-3 h-3 text-blue-500 rotate-180" />; 
+    if (type === "filter" && filterConfig && filterConfig.key === key) {
+      return <ChevronDownIcon className="w-3 h-3 text-blue-500 rotate-180" />;
     }
     return <ChevronDownIcon className="w-3 h-3 text-[#5c5c5c]" />;
   };
 
+  const navigate = useNavigate();
+  const handleViewDetail = (id) => {
+    navigate(`/transactions/${id}`);
+  };
+
+  const { setRekberCount } = useRekberStore();
+  useEffect(() => {
+    setRekberCount(initialRekberData.length);
+  }, [initialRekberData]);
 
   return (
     <div className="flex w-full justify-center p-4">
-      <div className="w-full max-w-[1200px] overflow-x-auto">
+      <div className="w-full max-w">
         {/* Component to display the total number of items */}
         <div className="relative w-full flex flex-row items-center justify-start gap-6 text-left text-black font-sf-pro mb-4">
           <div className="relative font-semibold text-lg sm:text-xl md:text-2xl lg:text-xl">
@@ -247,7 +302,9 @@ const DataTableRekber = () => {
           </div>
           {/* Badge for the total content */}
           <div className="rounded-full bg-blue-500 overflow-hidden flex flex-row items-center justify-center py-1 px-5 gap-1 text-base text-white font-bold min-w-[60px]">
-            <b className="relative leading-[22px]">{initialRekberData.length}</b>
+            <b className="relative leading-[22px]">
+              {initialRekberData.length}
+            </b>
           </div>
         </div>
         {/* End of component to display the total content */}
@@ -276,11 +333,11 @@ const DataTableRekber = () => {
               {/* Waktu Bikin Rekber Column - Clickable for Sorting */}
               <TableHead
                 className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[180px]"
-                onClick={() => handleSort('waktuBikinRekber')}
+                onClick={() => handleSort("waktuBikinRekber")}
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Waktu Rekber</span>
-                  {getArrowIcon('waktuBikinRekber', 'sort')}
+                  {getArrowIcon("waktuBikinRekber", "sort")}
                 </div>
               </TableHead>
 
@@ -308,33 +365,33 @@ const DataTableRekber = () => {
               {/* Nominal Transaksi Column - Clickable for Sorting */}
               <TableHead
                 className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[150px]"
-                onClick={() => handleSort('nominalTransaksi')}
+                onClick={() => handleSort("nominalTransaksi")}
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Nominal Transaksi</span>
-                  {getArrowIcon('nominalTransaksi', 'sort')}
+                  {getArrowIcon("nominalTransaksi", "sort")}
                 </div>
               </TableHead>
 
               {/* Status Rekber Column - Clickable for Categorization */}
               <TableHead
                 className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[160px]"
-                onClick={() => handleCategoryFilter('statusRekber')}
+                onClick={() => handleCategoryFilter("statusRekber")}
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Status Rekber</span>
-                  {getArrowIcon('statusRekber', 'filter')}
+                  {getArrowIcon("statusRekber", "filter")}
                 </div>
               </TableHead>
 
               {/* Kolom Pengajuan Column - Clickable for Categorization */}
               <TableHead
                 className="h-[38px] px-2 py-0 border-r border-[#c9c9c9] font-body-font-scale-base-semibold text-[#5c5c5c] text-sm group hover:bg-[#e6f7ff] transition-colors duration-200 cursor-pointer min-w-[140px]"
-                onClick={() => handleCategoryFilter('kolomPengajuan')}
+                onClick={() => handleCategoryFilter("kolomPengajuan")}
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Pengajuan</span>
-                  {getArrowIcon('kolomPengajuan', 'filter')}
+                  {getArrowIcon("kolomPengajuan", "filter")}
                 </div>
               </TableHead>
 
@@ -410,7 +467,11 @@ const DataTableRekber = () => {
 
                 {/* Nominal Transaksi Cell - Difomat dengan titik ribuan */}
                 <TableCell className="px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c]">
-                  Rp. {item.nominalTransaksi.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  Rp.{" "}
+                  {item.nominalTransaksi.toLocaleString("id-ID", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </TableCell>
 
                 {/* Status Rekber Cell - With Dynamic Color and "Huge Fill" Badge */}
@@ -422,7 +483,11 @@ const DataTableRekber = () => {
 
                 {/* Kolom Pengajuan Cell - With Conditional Text Color */}
                 <TableCell className="px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c]">
-                  <span className={`inline-flex items-center justify-center rounded-full text-xs font-medium px-2.5 py-0.5 ${getPengajuanTextColorClass(item.kolomPengajuan)}`}>
+                  <span
+                    className={`inline-flex items-center justify-center rounded-full text-xs font-medium px-2.5 py-0.5 ${getPengajuanTextColorClass(
+                      item.kolomPengajuan
+                    )}`}
+                  >
                     {item.kolomPengajuan}
                   </span>
                 </TableCell>
@@ -430,7 +495,10 @@ const DataTableRekber = () => {
                 {/* Action Cell */}
                 <TableCell className="w-[52px] p-0">
                   <div className="flex h-[38px] items-center justify-center">
-                    <ArrowRightIcon className="w-4 h-4 text-[#5c5c5c]" />
+                    <ArrowRightIcon
+                      className="w-4 h-4 text-[#5c5c5c] cursor-pointer hover:text-blue-600 transition"
+                      onClick={() => handleViewDetail(item.id)}
+                    />
                   </div>
                 </TableCell>
               </TableRow>

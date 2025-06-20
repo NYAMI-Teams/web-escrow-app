@@ -8,25 +8,67 @@ import BarangRusakPage from "../pages/BarangRusakPage";
 import DetailBarangRusakPage from "../pages/DetailBarangRusakPage";
 import BarangGaSesuaiPage from "../pages/BarangGaSesuaiPage";
 import DetailBarangGaSesuaiPage from "../pages/DetailBarangGaSesuaiPage";
+import Transaksi from "../pages/Transaksi";
+import Login from "../pages/Login";
+import RekberDetailPage from "../pages/RekberDetailPage";
+import ProtectedRoute from "./ProtectedRoute"; // tambahkan ini
+import { UserDetail } from "../pages/UserDetail";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path='/'
-          element={
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          }
-        />
+        <Route path='/' element={<Login />} />
+
         <Route
           path='/users'
           element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Users />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/users/:usersId'
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <UserDetail/>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path='/' element={<Login />} />
+        {/* <Route
+          path="/user/detail"
+          element={
             <MainLayout>
-              <Users />
+              <UserDetail/>
             </MainLayout>
+          }
+        /> */}
+
+        <Route
+          path='/transactions'
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Transaksi />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/transactions/:transactionId'
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RekberDetailPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route

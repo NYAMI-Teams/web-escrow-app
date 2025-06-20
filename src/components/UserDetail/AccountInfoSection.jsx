@@ -1,25 +1,26 @@
 import React from "react";
+import { formatDateTime } from "../lib/dateFormat";
 
-export const AccountInfoSection = () => {
+export const AccountInfoSection = ({ userInfo }) => {
   const accountData = [
     {
       label: "Email Pengguna",
-      value: "irgiskakmat@gmail.com",
+      value: userInfo.email,
       rightLabel: "Tanggal Pendaftaran",
-      rightValue: "11 Juni 2025 12 : 00 WIB"
+      rightValue: formatDateTime(userInfo.createDate)
     },
     {
       label: "Status KYC",
-      value: "Terverifikasi",
+      value: userInfo.kycStatus,
       isStatus: true,
       rightLabel: "Tanggal Submit KYC",
-      rightValue: "11 Juni 2025 14 : 00 WIB"
+      rightValue: formatDateTime(userInfo.kycSubmittedAt)
     },
     {
       label: "ID Pengguna",
-      value: "RBK-0000001",
+      value: userInfo.usersId,
       rightLabel: "Tanggal Diterima",
-      rightValue: "11 Juni 2025 16 : 00 WIB"
+      rightValue: formatDateTime(userInfo.updateDate)
     }
   ];
 
@@ -34,8 +35,20 @@ export const AccountInfoSection = () => {
               <p className="text-sm text-gray-500 mb-1">{item.label}</p>
               <div className="flex items-center">
                 {item.isStatus ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      item.value === "verified"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                        item.value === "verified"
+                          ? "bg-green-400"
+                          : "bg-red-400"
+                      }`}
+                    ></span>
                     {item.value}
                   </span>
                 ) : (
