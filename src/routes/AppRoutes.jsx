@@ -28,20 +28,12 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <UserDetail/>
+                <UserDetail />
               </MainLayout>
             </ProtectedRoute>
           }
         />
         <Route path='/' element={<Login />} />
-        {/* <Route
-          path="/user/detail"
-          element={
-            <MainLayout>
-              <UserDetail/>
-            </MainLayout>
-          }
-        /> */}
 
         <Route
           path='/transactions'
