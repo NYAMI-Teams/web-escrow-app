@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import VerticalStep from "../components/complain/VerticalStep";
+import InformasiTanggapan from "../components/complain/InformasiTanggapan";
 import { ChevronRightIcon } from "lucide-react";
 import buktiPengirimanImg from "../assets/bukti-pengajuan.png";
 
@@ -35,7 +36,7 @@ const formatDate = (date) => {
     hour: '2-digit', minute: '2-digit',
     timeZone: 'Asia/Jakarta', hour12: false
   };
-  return new Intl.DateTimeFormat('id-ID', options).format(date).replace('.', ':') + " WIB";
+  return new Intl.DateTimeFormat('id-ID', options).format(new Date(date)) + " WIB";
 };
 
 const DetailBarangRusakPage = () => {
@@ -44,10 +45,10 @@ const DetailBarangRusakPage = () => {
   const komplainData = location.state?.data || {
     id: "12345678901",
     nama: "iPhone 13 Pro Max",
-    pembeli: "bayuseptyan925@gmail.com"
+    pembeli: "bayuseptyan925@gmail.com",
   };
 
-  const [status, setStatus] = useState(komplainData.status || "Persetujuan Admin");
+  const [status, setStatus] = useState(komplainData.status || "Menunggu seller setuju");
   const [adminActionTimestamp, setAdminActionTimestamp] = useState(null);
   const [isRejectedByAdmin, setIsRejectedByAdmin] = useState(false);
 
@@ -64,7 +65,9 @@ const DetailBarangRusakPage = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <BreadcrumbDetailComplain idKomplain={komplainData.id} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Tracking Komplain */}
         <div className="lg:col-span-1">
           <VerticalStep
             type="rusak"
@@ -78,73 +81,10 @@ const DetailBarangRusakPage = () => {
           />
         </div>
 
+        {/* Right Side Content */}
         <div className="lg:col-span-2">
           {/* Informasi Tanggapan */}
-          <ComplainInfoSection title="Informasi Tanggapan">
-            {/* Label solusi */}
-            <div className="inline-block bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded-md mb-6">
-              Pengembalian barang dan dana
-            </div>
-
-            {/* Chat bubble kiri: komentar */}
-            <div className="flex mb-4">
-              <div className="bg-gray-100 text-gray-800 text-sm px-4 py-2 rounded-lg rounded-tl-none max-w-md">
-                Layar barang pecah di bagian tengah dan ada goresan dalam di sisi kiri.
-              </div>
-            </div>
-
-            {/* Chat bubble kiri: media */}
-            <div className="flex gap-4 mb-2">
-              {[1, 2].map((_, i) => (
-                <div key={i} className="flex flex-col items-start gap-2 bg-gray-100 p-3 rounded-lg rounded-tl-none">
-                  <div className="relative overflow-hidden rounded-md">
-                    <img
-                      src={buktiPengirimanImg}
-                      alt={`Bukti ${i + 1}`}
-                      className="w-56 h-auto object-cover rounded-md"
-                    />
-                    {i === 1 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-md">
-                        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="bg-blue-600 text-white text-sm px-3 py-1 rounded flex items-center gap-1 hover:bg-blue-700">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13 10V3H7v7H4l6 6 6-6h-3z" />
-                      </svg>
-                      Download
-                    </button>
-                    <button className="bg-white border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50">
-                      Preview
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Chat bubble kiri: info email dan waktu */}
-            <div className="flex">
-              <div className="text-xs text-gray-500 ml-2">
-                bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10:00 WIB</strong>
-              </div>
-            </div>
-
-            {/* Chat bubble kanan: status */}
-            <div className="flex justify-end mt-6">
-              <div className="bg-blue-900 text-white text-sm px-4 py-3 rounded-lg rounded-tr-none w-fit min-w-[320px] text-right">
-                Menunggu seller setuju ataupun menolak komplain ini .....
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <p className="text-xs text-red-600 mt-1 text-right">
-                Menunggu respon sampai <strong>18 Juni 2025, 10.00 WIB</strong>
-              </p>
-            </div>
-          </ComplainInfoSection>
+          <InformasiTanggapan />
 
           {/* Informasi Komplain */}
           <ComplainInfoSection title="Informasi Komplain">
