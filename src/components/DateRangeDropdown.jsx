@@ -6,7 +6,7 @@ import "react-day-picker/dist/style.css";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
-const DateRangeDropdown = ({ selectedRange, onChange }) => {
+const DateRangeDropdown = ({ selectedRange, onRangeChange, placeholder = "Rentang Tanggal" }) => {
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState({
     from: selectedRange?.[0],
@@ -75,7 +75,7 @@ const DateRangeDropdown = ({ selectedRange, onChange }) => {
     } else if (range?.from) {
       return `${format(range.from, "dd/MM/yyyy")} - ...`;
     } else {
-      return "Rentang Tanggal";
+      return placeholder;
     }
   })();
 
@@ -119,7 +119,7 @@ const DateRangeDropdown = ({ selectedRange, onChange }) => {
                 if (!range?.from) return;
                 const from = range.from;
                 const to = range.to || from;
-                onChange([from, to]);
+                onRangeChange([from, to]);
                 setOpen(false);
               }}
               className='px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
