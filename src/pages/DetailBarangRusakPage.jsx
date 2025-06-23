@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import VerticalStep from "../components/complain/VerticalStep";
 import { Check, Info } from "lucide-react";
+import InformasiTanggapan from "../components/complain/InformasiTanggapan";
+import { ChevronRightIcon } from "lucide-react";
 import buktiPengirimanImg from "../assets/bukti-pengajuan.png";
 import Breadcrumb from "../components/BreadCrumb";
 import { STATUS, STEP_FLOW } from "../constants/complainStatusMap";
@@ -33,19 +35,28 @@ const mapStatusToStep = (status) => {
             return "dalamInvestigasi";
     }
 };
+const BreadcrumbDetailComplain = ({ idKomplain }) => (
+  <nav className="flex items-center space-x-2 text-sm mb-6">
+    <a href="/barang-rusak" className="text-blue-600 hover:underline">Komplain Center</a>
+    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+    <a href="/barang-rusak" className="text-blue-600 hover:underline">Komplain Barang Rusak</a>
+    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+    <span className="text-gray-500">{idKomplain}</span>
+  </nav>
+);
 
 const ComplainInfoSection = ({ title, children }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
-        {children}
-    </div>
+  <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
+    {children}
+  </div>
 );
 
 const InfoRow = ({ label, value }) => (
-    <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-        <span className="text-gray-600">{label}</span>
-        <span className="text-gray-800 font-semibold">{value}</span>
-    </div>
+  <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+    <span className="text-gray-600">{label}</span>
+    <span className="text-gray-800 font-semibold">{value}</span>
+  </div>
 );
 
 const fallbackMockData = {
@@ -61,9 +72,13 @@ const fallbackMockData = {
 };
 
 const formatDate = (date) => {
-    if (!date) return '';
-    const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta', hour12: false };
-    return new Intl.DateTimeFormat('id-ID', options).format(date).replace('.', ':') + " WIB";
+  if (!date) return '';
+  const options = {
+    day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+    timeZone: 'Asia/Jakarta', hour12: false
+  };
+  return new Intl.DateTimeFormat('id-ID', options).format(new Date(date)) + " WIB";
 };
 
 const DetailBarangRusakPage = () => {
@@ -463,4 +478,4 @@ const DetailBarangRusakPage = () => {
     );
 };
 
-export default DetailBarangRusakPage; 
+export default DetailBarangRusakPage;
