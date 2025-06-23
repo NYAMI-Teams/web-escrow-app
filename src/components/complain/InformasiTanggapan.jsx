@@ -1,25 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import buktiPengirimanImg from "../../assets/bukti-pengajuan.png";
 
-const InformasiTanggapan = ({ status: initialStatus }) => {
-  const [status, setStatus] = useState(initialStatus);
-
+const InformasiTanggapan = ({ status, setStatus }) => {
   const isDibatalkan = status === "Dibatalkan";
   const isPengembalian = status === "Pengembalian Barang";
   const isPersetujuanAdmin = status === "Persetujuan Admin";
+  const isTransaksiSelesai = status === "Transaksi Selesai";
 
   const showTanggapanAdmin = isPersetujuanAdmin || isPengembalian;
   const isDisabled = isPengembalian;
 
-  const handleDownload = (url, index) => {
+  const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = url;
-    link.download = `bukti_${index + 1}.jpg`;
+    link.href = buktiPengirimanImg;
+    link.download = "bukti-pengajuan.png";
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
-  const handlePreview = (url) => {
-    window.open(url, "_blank");
+  const handlePreview = () => {
+    window.open(buktiPengirimanImg, "_blank");
   };
 
   return (
@@ -57,20 +58,22 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
-              <button
-                className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
-                onClick={() => handleDownload(buktiPengirimanImg, i)}
-              >
-                Download
-              </button>
-              <button
-                className="border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50"
-                onClick={() => handlePreview(buktiPengirimanImg)}
-              >
-                Preview
-              </button>
-            </div>
+            {(isPengembalian || isPersetujuanAdmin) && (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDownload}
+                  className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
+                >
+                  Download
+                </button>
+                <button
+                  onClick={handlePreview}
+                  className="border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50"
+                >
+                  Preview
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -78,7 +81,7 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
       {/* Chat bubble kiri: info email dan waktu */}
       <div className="flex">
         <div className="text-xs text-gray-500 ml-2">
-          bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10:00 WIB</strong>
+          bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10 : 00 WIB</strong>
         </div>
       </div>
 
@@ -110,14 +113,14 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
                 </div>
                 <div className="flex gap-2">
                   <button
+                    onClick={handleDownload}
                     className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
-                    onClick={() => handleDownload(buktiPengirimanImg, i)}
                   >
                     Download
                   </button>
                   <button
+                    onClick={handlePreview}
                     className="border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50"
-                    onClick={() => handlePreview(buktiPengirimanImg)}
                   >
                     Preview
                   </button>
@@ -127,70 +130,50 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
           </div>
 
           <div className="text-xs text-gray-500 mt-1 text-right">
-            bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10:00 WIB</strong>
+            bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10 : 00 WIB</strong>
           </div>
         </>
       )}
 
       {/* Tambahan bubble jika pengembalian barang */}
       {isPengembalian && (
+        <div className="mt-6 ml-auto w-fit text-right">
+          <div className="bg-blue-900 text-white text-sm px-4 py-3 rounded-lg rounded-tr-none max-w-md">
+            Seller mau nerima barang kembaliin agar dapat ditukar, kirim bukti Refund
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            irgi168@gmail.com · <strong>16 Juni 2025, 12 : 00 WIB</strong>
+          </div>
+        </div>
+      )}
+
+      {/* Tambahan bubble jika transaksi selesai */}
+      {isTransaksiSelesai && (
         <>
-          <div className="mt-6 ml-auto w-fit text-right">
-            <div className="bg-blue-900 text-white text-sm px-4 py-3 rounded-lg rounded-tr-none max-w-md">
-              Penolakan dikarenakan bukti buyer belum cukup kuat dan tidak ada alasan menerima hal seperti itu
+        <div className="mt-4 ml-auto w-fit text-right">
+            <div className="bg-blue-900 text-white text-sm px-4 py-2 rounded-lg rounded-tr-none w-fit max-w-md">
+              Seller mau nerima barang kembaliin agar dapat ditukar, kirim bukti Refund
+            </div>
+            <div className="text-xs text-gray-500 ml-2 mt-1">
+              irgi168@gmail.com · <strong>17 Juni 2025, 12 : 00 WIB</strong>
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="bg-gray-100 text-gray-800 text-sm px-4 py-2 rounded-lg rounded-tl-none w-fit max-w-md">
+              Melalui resi harusnya barang sudah sampai di seller
+            </div>
+            <div className="text-xs text-gray-500 ml-2 mt-1">
+              bayuseptyan925@gmail.com · <strong>17 Juni 2025, 10 : 00 WIB</strong>
             </div>
           </div>
 
-          <div className="flex gap-4 mt-4 justify-end">
-            {/* Gambar biasa */}
-            <div className="flex flex-col items-start gap-2 bg-gray-100 p-3 rounded-lg rounded-tl-none">
-              <img
-                src={buktiPengirimanImg}
-                alt="Bukti Refund"
-                className="w-56 h-auto object-cover rounded-md"
-              />
-              <div className="flex gap-2">
-                <button
-                  className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
-                  onClick={() => handleDownload(buktiPengirimanImg, 0)}
-                >
-                  Download
-                </button>
-                <button
-                  className="border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50"
-                  onClick={() => handlePreview(buktiPengirimanImg)}
-                >
-                  Preview
-                </button>
-              </div>
+          <div className="mt-4 ml-auto w-fit text-right">
+            <div className="bg-blue-900 text-white text-sm px-4 py-2 rounded-lg rounded-tr-none w-fit max-w-md">
+              Konfirmasi seller barang sudah diterima
             </div>
-
-            {/* Simulasi video */}
-            <div className="flex flex-col items-start gap-2 bg-gray-100 p-3 rounded-lg rounded-tl-none">
-              <div className="relative overflow-hidden rounded-md bg-black w-56 h-[140px] flex items-center justify-center">
-                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
-                  onClick={() => handleDownload(buktiPengirimanImg, 1)}
-                >
-                  Download
-                </button>
-                <button
-                  className="border border-blue-600 text-blue-600 text-sm px-3 py-1 rounded hover:bg-blue-50"
-                  onClick={() => handlePreview(buktiPengirimanImg)}
-                >
-                  Preview
-                </button>
-              </div>
+            <div className="text-xs text-gray-500 ml-2 mt-1">
+              irgi168@gmail.com · <strong>17 Juni 2025, 12 : 00 WIB</strong>
             </div>
-          </div>
-
-          <div className="text-xs text-gray-500 mt-1 text-right">
-            bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10:00 WIB</strong>
           </div>
         </>
       )}
@@ -201,14 +184,19 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
           <h3 className="text-sm font-semibold text-gray-800 mb-2">Tanggapan Admin</h3>
           <textarea
             rows="3"
-            className={`w-full border rounded-lg p-3 text-sm ${isDisabled ? "bg-gray-100 text-gray-500" : "text-gray-800"}`}
+            className={`w-full border rounded-lg p-3 text-sm text-gray-800 ${
+              isDisabled ? "bg-gray-100" : ""
+            }`}
             placeholder="Tulis tanggapan admin di sini..."
             defaultValue="Setelah tinjau bukti yang kamu kirim, komplain dinyatakan valid. Refund akan diproses meski seller menolak, sesuai ketentuan yang berlaku."
             disabled={isDisabled}
           />
-          {!isDisabled && (
+          {!isPengembalian && (
             <div className="flex justify-end gap-3 mt-3">
-              <button className="bg-pink-100 text-pink-700 text-sm px-5 py-2 rounded hover:bg-pink-200">
+              <button
+                className="bg-pink-100 text-pink-700 text-sm px-5 py-2 rounded hover:bg-pink-200"
+                onClick={() => {}}
+              >
                 Tolak
               </button>
               <button
@@ -223,7 +211,7 @@ const InformasiTanggapan = ({ status: initialStatus }) => {
       )}
 
       {/* Chat bubble kanan: status dari step saat ini */}
-      {!isPengembalian && !isDibatalkan && !isPersetujuanAdmin && (
+      {!isPengembalian && !isDibatalkan && !isPersetujuanAdmin && !isTransaksiSelesai && (
         <>
           <div className="flex justify-end mt-6">
             <div className="bg-blue-900 text-white text-sm px-4 py-3 rounded-lg rounded-tr-none w-fit min-w-[320px] text-right">
