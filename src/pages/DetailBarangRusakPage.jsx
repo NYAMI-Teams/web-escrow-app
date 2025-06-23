@@ -74,7 +74,10 @@ const DetailBarangRusakPage = () => {
             complainType="Barang Rusak"
             currentStatus={status}
             steps={steps}
-            onTolak={() => setStatus("Transaksi Selesai")}
+            onTolak={() => {
+              setStatus("Dibatalkan");
+              setIsRejectedByAdmin(false);
+            }}
             onSetuju={() => setStatus("Pengembalian Barang")}
             adminActionTimestamp={formatDate(adminActionTimestamp)}
             isRejectedByAdmin={isRejectedByAdmin}
@@ -84,7 +87,7 @@ const DetailBarangRusakPage = () => {
         {/* Right Side Content */}
         <div className="lg:col-span-2">
           {/* Informasi Tanggapan */}
-          <InformasiTanggapan />
+          <InformasiTanggapan status={status} />
 
           {/* Informasi Komplain */}
           <ComplainInfoSection title="Informasi Komplain">
