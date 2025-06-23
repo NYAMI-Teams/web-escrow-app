@@ -25,22 +25,18 @@ const InformasiTanggapan = ({ status, setStatus }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      {/* Title */}
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Informasi Tanggapan</h2>
 
-      {/* Label solusi */}
       <div className="inline-block bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded-md mb-6">
         Pengembalian barang dan dana
       </div>
 
-      {/* Chat bubble kiri: komentar */}
       <div className="flex mb-4">
         <div className="bg-gray-100 text-gray-800 text-sm px-4 py-2 rounded-lg rounded-tl-none max-w-md">
           Layar barang pecah di bagian tengah dan ada goresan dalam di sisi kiri.
         </div>
       </div>
 
-      {/* Chat bubble kiri: media */}
       <div className="flex gap-4 mb-2">
         {[1, 2].map((_, i) => (
           <div key={i} className="flex flex-col items-start gap-2 bg-gray-100 p-3 rounded-lg rounded-tl-none">
@@ -78,14 +74,12 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         ))}
       </div>
 
-      {/* Chat bubble kiri: info email dan waktu */}
       <div className="flex">
         <div className="text-xs text-gray-500 ml-2">
           bayuseptyan925@gmail.com · <strong>16 Juni 2025, 10 : 00 WIB</strong>
         </div>
       </div>
 
-      {/* Tambahan bubble jika persetujuan admin */}
       {isPersetujuanAdmin && (
         <>
           <div className="mt-6 ml-auto w-fit text-right">
@@ -135,7 +129,6 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         </>
       )}
 
-      {/* Tambahan bubble jika pengembalian barang */}
       {isPengembalian && (
         <div className="mt-6 ml-auto w-fit text-right">
           <div className="bg-blue-900 text-white text-sm px-4 py-3 rounded-lg rounded-tr-none max-w-md">
@@ -147,10 +140,9 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         </div>
       )}
 
-      {/* Tambahan bubble jika transaksi selesai */}
       {isTransaksiSelesai && (
         <>
-        <div className="mt-4 ml-auto w-fit text-right">
+          <div className="mt-4 ml-auto w-fit text-right">
             <div className="bg-blue-900 text-white text-sm px-4 py-2 rounded-lg rounded-tr-none w-fit max-w-md">
               Seller mau nerima barang kembaliin agar dapat ditukar, kirim bukti Refund
             </div>
@@ -178,7 +170,6 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         </>
       )}
 
-      {/* Text field dan tombol tanggapan admin */}
       {showTanggapanAdmin && (
         <div className="mt-6">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">Tanggapan Admin</h3>
@@ -210,7 +201,6 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         </div>
       )}
 
-      {/* Chat bubble kanan: status dari step saat ini */}
       {!isPengembalian && !isDibatalkan && !isPersetujuanAdmin && !isTransaksiSelesai && (
         <>
           <div className="flex justify-end mt-6">
@@ -226,7 +216,6 @@ const InformasiTanggapan = ({ status, setStatus }) => {
         </>
       )}
 
-      {/* Tambahan bubble jika dibatalkan */}
       {isDibatalkan && (
         <>
           <div className="flex justify-end mt-6">
