@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import VerticalStep from "../components/complain/VerticalStep";
-import { ArrowDownToLine, Eye, ChevronRightIcon } from "lucide-react";
+import { ArrowDownToLine, Eye } from "lucide-react";
 import buktiPengirimanImg from "../assets/contoh-resi.png";
+import Breadcrumb from "../components/BreadCrumb";
 
 // Data komplain, mapping dari API
 const detailKomplain = {
@@ -34,16 +35,6 @@ const mapStatusToStep = (status) => {
             return "dalamInvestigasi";
     }
 };
-
-const BreadcrumbComplainDetail = () => (
-    <nav className="flex items-center space-x-2 text-sm mb-6">
-        <span className="text-gray-600">Komplain Center</span>
-        <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-        <span className="text-gray-600">Komplain Barang Hilang</span>
-        <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-        <span className="text-blue-600 font-medium">Detail Barang Hilang</span>
-    </nav>
-);
 
 const DetailBarangHilangPage = () => {
     const location = useLocation();
@@ -84,7 +75,7 @@ const DetailBarangHilangPage = () => {
 
     return (
         <div className="max-w-5xl mx-auto py-8 px-2">
-            <BreadcrumbComplainDetail />
+            <Breadcrumb />
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Step Vertical di kiri */}
                 <div className="md:w-1/3 w-full">

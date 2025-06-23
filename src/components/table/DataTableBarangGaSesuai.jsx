@@ -20,7 +20,8 @@ const STATUS_COLORS = {
 
 const PENGAJUAN_STATUS_COLORS = {
     "Ditolak": "text-red-500 font-semibold",
-    "Menunggu buyer": "text-green-600 font-semibold",
+    "Menunggu Seller": "text-blue-600 font-semibold",
+    "Ditinjau": "text-yellow-600 font-semibold",
     "Tanpa pengajuan": "text-gray-500",
 };
 
@@ -83,7 +84,7 @@ const initialData = [
         ekspedisi: "SiCepat Express",
         status: "Pengembalian Barang",
         asuransi: false,
-        statusPengajuan: "Menunggu buyer",
+        statusPengajuan: "Ditinjau",
     },
     {
         id: "GS2345678904",
@@ -147,9 +148,9 @@ const initialData = [
         pembeli: "user14@example.com",
         noResi: "GS3474124021",
         ekspedisi: "J&T Express Indonesia",
-        status: "Dibatalkan",
+        status: "Pengembalian Barang",
         asuransi: true,
-        statusPengajuan: null,
+        statusPengajuan: "Menunggu Seller",
     },
     {
         id: "GS2345678910",
@@ -160,36 +161,133 @@ const initialData = [
         ekspedisi: "GoSend",
         status: "Pengembalian Barang",
         asuransi: false,
-        statusPengajuan: "Menunggu buyer",
+        statusPengajuan: "Ditinjau",
+    },
+    {
+        id: "GS2345678911",
+        waktu: "29 Juni 2025",
+        nama: "Tas Selempang",
+        pembeli: "user16@example.com",
+        noResi: "GS3474124023",
+        ekspedisi: "J&T Express Indonesia",
+        status: "Pengembalian Barang",
+        asuransi: true,
+        statusPengajuan: "Tanpa pengajuan",
+    },
+    {
+        id: "GS2345678912",
+        waktu: "30 Juni 2025",
+        nama: "Sepatu Sneakers",
+        pembeli: "user17@example.com",
+        noResi: "GS3474124024",
+        ekspedisi: "JNE Indonesia",
+        status: "Pengembalian Barang",
+        asuransi: false,
+        statusPengajuan: "Ditinjau",
+    },
+    {
+        id: "GS2345678913",
+        waktu: "1 Juli 2025",
+        nama: "Koper Kabin",
+        pembeli: "user18@example.com",
+        noResi: "GS3474124025",
+        ekspedisi: "SiCepat Express",
+        status: "Pengembalian Barang",
+        asuransi: true,
+        statusPengajuan: "Menunggu Seller",
+    },
+    {
+        id: "GS2345678914",
+        waktu: "2 Juli 2025",
+        nama: "Jas Hujan",
+        pembeli: "user19@example.com",
+        noResi: "GS3474124026",
+        ekspedisi: "Pos Indonesia",
+        status: "Pengembalian Barang",
+        asuransi: false,
+        statusPengajuan: "Ditolak",
     },
 ];
 
-const DataTableBarangGaSesuai = ({ onRowDetail }) => {
+const DataTableBarangGaSesuai = ({ onRowDetail, filterConfig, loading = false }) => {
     const [data, setData] = useState(initialData);
     const [selectAll, setSelectAll] = useState(false);
     const [checkedItems, setCheckedItems] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-    const [filterConfig, setFilterConfig] = useState(null);
+
+    const parseDate = (str) => {
+        const [day, month, year] = str.split(" ");
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        return new Date(parseInt(year), months.indexOf(month), parseInt(day));
+    };
+
+    const isDateInRange = (dateStr, dateRange) => {
+        if (!dateRange || !Array.isArray(dateRange) || dateRange.length < 2) return true;
+
+        const itemDate = parseDate(dateStr);
+        const startDate = new Date(dateRange[0]);
+        const endDate = new Date(dateRange[1]);
+
+        return itemDate >= startDate && itemDate <= endDate;
+    };
+
+    const matchesSearch = (item, searchTerm) => {
+        if (!searchTerm) return true;
+
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            item.id.toLowerCase().includes(searchLower) ||
+            item.nama.toLowerCase().includes(searchLower) ||
+            item.pembeli.toLowerCase().includes(searchLower)
+        );
+    };
+
+    const matchesStatusFilter = (item, statusFilter) => {
+        if (!statusFilter || statusFilter.length === 0) return true;
+        return statusFilter.includes(item.status);
+    };
+
+    const matchesSubmissionStatusFilter = (item, submissionStatusFilter) => {
+        if (!submissionStatusFilter || submissionStatusFilter.length === 0) return true;
+        return submissionStatusFilter.includes(item.statusPengajuan);
+    };
 
     const processedData = useMemo(() => {
-        let sortableItems = [...data];
+        let filteredItems = [...data];
+
         if (filterConfig) {
-            if (filterConfig.key === "status") {
-                sortableItems.sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
+            if (filterConfig.searchTerm) {
+                filteredItems = filteredItems.filter(item =>
+                    matchesSearch(item, filterConfig.searchTerm)
+                );
+            }
+
+            if (filterConfig.dateRange) {
+                filteredItems = filteredItems.filter(item =>
+                    isDateInRange(item.waktu, filterConfig.dateRange)
+                );
+            }
+
+            if (filterConfig.complainStatus && filterConfig.complainStatus.length > 0) {
+                filteredItems = filteredItems.filter(item =>
+                    matchesStatusFilter(item, filterConfig.complainStatus)
+                );
+            }
+
+            if (filterConfig.submissionStatus && filterConfig.submissionStatus.length > 0) {
+                filteredItems = filteredItems.filter(item =>
+                    matchesSubmissionStatusFilter(item, filterConfig.submissionStatus)
+                );
             }
         }
+
         if (sortConfig && sortConfig.key) {
-            sortableItems.sort((a, b) => {
+            filteredItems.sort((a, b) => {
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (sortConfig.key === "waktu") {
-                    const parseDate = (str) => {
-                        const [day, month, year] = str.split(" ");
-                        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                        return new Date(parseInt(year), months.indexOf(month), parseInt(day));
-                    };
                     const aDate = parseDate(aValue);
                     const bDate = parseDate(bValue);
                     return sortConfig.direction === "ascending" ? aDate - bDate : bDate - aDate;
@@ -210,11 +308,16 @@ const DataTableBarangGaSesuai = ({ onRowDetail }) => {
                 return 0;
             });
         }
-        return sortableItems;
+
+        return filteredItems;
     }, [data, sortConfig, filterConfig]);
 
     const totalPages = Math.ceil(processedData.length / itemsPerPage);
     const currentItems = processedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterConfig]);
 
     useEffect(() => {
         const allChecked = currentItems.length > 0 && currentItems.every((item) => checkedItems[item.id]);
@@ -247,7 +350,6 @@ const DataTableBarangGaSesuai = ({ onRowDetail }) => {
         } else if (sortConfig.direction === "descending") {
             setSortConfig({ key: null, direction: null });
         }
-        setFilterConfig(null);
         setCurrentPage(1);
     };
 
@@ -259,22 +361,21 @@ const DataTableBarangGaSesuai = ({ onRowDetail }) => {
         } else if (sortConfig.direction === "descending") {
             setSortConfig({ key: null, direction: null });
         }
-        setFilterConfig(null);
         setCurrentPage(1);
     };
 
     const handleCategoryFilter = (key) => {
-        if (filterConfig && filterConfig.key === key) {
-            setFilterConfig(null);
+        if (sortConfig && sortConfig.key === key) {
             setSortConfig({ key: null, direction: null });
         } else {
-            setFilterConfig({ key });
             setSortConfig({ key: null, direction: null });
         }
         setCurrentPage(1);
     };
 
     const getStatusClass = (status) => STATUS_COLORS[status] || "text-gray-500";
+
+    const getPengajuanStatusClass = (status) => PENGAJUAN_STATUS_COLORS[status] || "text-gray-500";
 
     const getArrowIcon = (key, type = "sort") => {
         if (type === "sort" && sortConfig && sortConfig.key === key) {
@@ -298,96 +399,177 @@ const DataTableBarangGaSesuai = ({ onRowDetail }) => {
                         Jumlah informasi yang ditampilkan
                     </div>
                     <div className="rounded-full bg-blue-500 overflow-hidden flex flex-row items-center justify-center py-1 px-5 gap-1 text-base text-white font-bold min-w-[60px]">
-                        <b className="relative leading-[22px]">{data.length}</b>
+                        <b className="relative leading-[22px]">{processedData.length}</b>
                     </div>
                 </div>
-                <Table className="border-collapse border border-[#c9c9c9] w-full">
-                    <TableHeader>
-                        <TableRow className="bg-[#f3f3f3] border-b border-[#c9c9c9]">
-                            <TableHead className="w-[42px] h-[38px] p-0 border-r border-[#c9c9c9] min-w-[42px]">
-                                <div className="flex h-[38px] items-center justify-center">
-                                    <Checkbox
-                                        className="h-4 w-4 rounded border border-solid border-[#5c5c5c] bg-white cursor-pointer"
-                                        checked={selectAll}
-                                        onCheckedChange={handleHeaderCheckboxChange}
-                                    />
-                                </div>
-                            </TableHead>
-                            {columns.map((col) => (
-                                <TableHead
-                                    key={col.key}
-                                    className={`h-[38px] px-2 py-0 border-r border-[#c9c9c9] text-[#5c5c5c] text-sm min-w-[${col.minWidth}] ${col.key === 'status' || col.sortable ? "cursor-pointer" : ""}`}
-                                    onClick={col.key === 'status' ? handleStatusSort : col.sortable ? () => handleSort(col.key) : undefined}
-                                >
-                                    <div className="flex items-center justify-between w-full">
-                                        <span>{col.label}</span>
-                                        {col.key === 'status' ? getArrowIcon('status', 'sort') : col.sortable ? getArrowIcon(col.key, 'sort') : null}
-                                        {col.filterable && col.key !== 'status' ? getArrowIcon(col.key, 'filter') : null}
-                                    </div>
-                                </TableHead>
+
+                {loading ? (
+                    <table className='border-collapse border border-[#c9c9c9] w-full animate-pulse'>
+                        <thead>
+                            <tr className='bg-[#f3f3f3] border-b border-[#c9c9c9]'>
+                                <th className='w-[42px] h-[38px] p-0 border-r border-[#c9c9c9] min-w-[42px]'>
+                                    <div className='bg-gray-200 h-4 w-[42px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[120px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[120px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[140px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[140px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[180px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[180px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[180px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[180px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[140px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[140px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[180px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[180px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[160px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[160px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[160px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[160px] rounded'></div>
+                                </th>
+                                <th className='px-2 text-sm text-[#5c5c5c] min-w-[80px]'>
+                                    <div className='bg-gray-200 h-4 min-w-[80px] rounded'></div>
+                                </th>
+                                <th className='w-[52px] h-[38px] p-0 min-w-[52px]'>
+                                    <div className='bg-gray-200 h-4 w-[52px] rounded'></div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[...Array(5)].map((_, index) => (
+                                <tr key={index} className='h-[38px] border-b border-[#c9c9c9] bg-white'>
+                                    <td className='w-[42px] p-0 border-r border-[#c9c9c9]'>
+                                        <div className='bg-gray-200 h-4 w-[42px] rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='px-2 text-sm text-[#5c5c5c] text-center'>
+                                        <div className='bg-gray-200 h-4 w-full rounded'></div>
+                                    </td>
+                                    <td className='w-[52px] p-0'>
+                                        <div className='bg-gray-200 h-4 w-[52px] rounded'></div>
+                                    </td>
+                                </tr>
                             ))}
-                            <TableHead className="w-[52px] h-[38px] p-0 min-w-[52px]">
-                                <div className="flex h-[38px] items-center justify-center"></div>
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {currentItems.map((item, index) => (
-                            <TableRow
-                                key={item.id}
-                                className={`h-[38px] border-b border-[#c9c9c9] ${index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"} hover:bg-[#e6f7ff]`}
-                            >
-                                <TableCell className="w-[42px] p-0 border-r border-[#c9c9c9]">
+                        </tbody>
+                    </table>
+                ) : (
+                    <Table className="border-collapse border border-[#c9c9c9] w-full">
+                        <TableHeader>
+                            <TableRow className="bg-[#f3f3f3] border-b border-[#c9c9c9]">
+                                <TableHead className="w-[42px] h-[38px] p-0 border-r border-[#c9c9c9] min-w-[42px]">
                                     <div className="flex h-[38px] items-center justify-center">
                                         <Checkbox
                                             className="h-4 w-4 rounded border border-solid border-[#5c5c5c] bg-white cursor-pointer"
-                                            checked={checkedItems[item.id] || false}
-                                            onCheckedChange={(checked) => handleCheckboxChange(item.id, checked)}
+                                            checked={selectAll}
+                                            onCheckedChange={handleHeaderCheckboxChange}
                                         />
                                     </div>
-                                </TableCell>
+                                </TableHead>
                                 {columns.map((col) => (
-                                    <TableCell
+                                    <TableHead
                                         key={col.key}
-                                        className={`px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c] ${col.key === "status" ? "text-sm" : ""} ${col.key === "asuransi" ? "text-center" : ""}`}
+                                        className={`h-[38px] px-2 py-0 border-r border-[#c9c9c9] text-[#5c5c5c] text-sm min-w-[${col.minWidth}] ${col.key === 'status' || col.sortable ? "cursor-pointer" : ""}`}
+                                        onClick={col.key === 'status' ? handleStatusSort : col.sortable ? () => handleSort(col.key) : undefined}
                                     >
-                                        {col.key === "status" ? (
-                                            <span className={`font-semibold ${getStatusClass(item.status)}`}>{item.status}</span>
-                                        ) : col.key === "statusPengajuan" ? (
-                                            (() => {
-                                                const statusPengajuan = item.status === 'Pengembalian Barang' ? item.statusPengajuan : "Tanpa pengajuan";
-                                                const statusClass = PENGAJUAN_STATUS_COLORS[statusPengajuan] || "text-gray-500";
-                                                return <span className={statusClass}>{statusPengajuan}</span>;
-                                            })()
-                                        ) : col.key === "asuransi" ? (
-                                            asuransiIcon(item.asuransi)
-                                        ) : (
-                                            <div
-                                                className={
-                                                    col.key === "nama" || col.key === "pembeli"
-                                                        ? "overflow-hidden whitespace-nowrap text-ellipsis max-w-[160px]"
-                                                        : undefined
-                                                }
-                                                title={item[col.key]}
-                                            >
-                                                {item[col.key]}
-                                            </div>
-                                        )}
-                                    </TableCell>
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{col.label}</span>
+                                            {col.key === 'status' ? getArrowIcon('status', 'sort') : col.sortable ? getArrowIcon(col.key, 'sort') : null}
+                                            {col.filterable && col.key !== 'status' ? getArrowIcon(col.key, 'filter') : null}
+                                        </div>
+                                    </TableHead>
                                 ))}
-                                <TableCell className="w-[52px] p-0">
-                                    <div className="flex h-[38px] items-center justify-center">
-                                        <ArrowRightIcon className="w-4 h-4 text-[#5c5c5c] cursor-pointer" onClick={() => onRowDetail && onRowDetail(item)} />
-                                    </div>
-                                </TableCell>
+                                <TableHead className="w-[52px] h-[38px] p-0 min-w-[52px]">
+                                    <div className="flex h-[38px] items-center justify-center"></div>
+                                </TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {currentItems.map((item, index) => (
+                                <TableRow
+                                    key={item.id}
+                                    className={`h-[38px] border-b border-[#c9c9c9] ${index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"} hover:bg-[#e6f7ff]`}
+                                >
+                                    <TableCell className="w-[42px] p-0 border-r border-[#c9c9c9]">
+                                        <div className="flex h-[38px] items-center justify-center">
+                                            <Checkbox
+                                                className="h-4 w-4 rounded border border-solid border-[#5c5c5c] bg-white cursor-pointer"
+                                                checked={checkedItems[item.id] || false}
+                                                onCheckedChange={(checked) => handleCheckboxChange(item.id, checked)}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    {columns.map((col) => (
+                                        <TableCell
+                                            key={col.key}
+                                            className={`px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c] ${col.key === "status" || col.key === "statusPengajuan" ? "text-sm" : ""} ${col.key === "asuransi" ? "text-center" : ""}`}
+                                        >
+                                            {col.key === "status" ? (
+                                                <span className={`font-semibold ${getStatusClass(item.status)}`}>{item.status}</span>
+                                            ) : col.key === "statusPengajuan" ? (
+                                                <span className={`font-semibold ${getPengajuanStatusClass(item.statusPengajuan)}`}>
+                                                    {item.statusPengajuan || "Tanpa pengajuan"}
+                                                </span>
+                                            ) : col.key === "asuransi" ? (
+                                                asuransiIcon(item.asuransi)
+                                            ) : (
+                                                <div
+                                                    className={
+                                                        col.key === "nama" || col.key === "pembeli"
+                                                            ? "overflow-hidden whitespace-nowrap text-ellipsis max-w-[160px]"
+                                                            : undefined
+                                                    }
+                                                    title={item[col.key]}
+                                                >
+                                                    {item[col.key]}
+                                                </div>
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                    <TableCell className="w-[52px] p-0">
+                                        <div className="flex h-[38px] items-center justify-center">
+                                            <ArrowRightIcon className="w-4 h-4 text-[#5c5c5c] cursor-pointer" onClick={() => onRowDetail && onRowDetail(item)} />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+
                 <div className="flex justify-end items-center mt-4 space-x-2">
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
+                        disabled={currentPage === 1 || loading}
                         className="px-3 py-1 border border-[#c9c9c9] rounded text-sm text-[#5c5c5c] bg-white hover:bg-[#e6f7ff] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Previous
@@ -396,14 +578,15 @@ const DataTableBarangGaSesuai = ({ onRowDetail }) => {
                         <button
                             key={index + 1}
                             onClick={() => handlePageChange(index + 1)}
-                            className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-white text-[#5c5c5c] hover:bg-[#e6f7ff]"}`}
+                            disabled={loading}
+                            className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-white text-[#5c5c5c] hover:bg-[#e6f7ff]"} disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {index + 1}
                         </button>
                     ))}
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === totalPages || loading}
                         className="px-3 py-1 border border-[#c9c9c9] rounded text-sm text-[#5c5c5c] bg-white hover:bg-[#e6f7ff] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Next

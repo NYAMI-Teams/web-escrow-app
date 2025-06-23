@@ -13,6 +13,9 @@ const Breadcrumb = () => {
     transactions: "Daftar Transaksi",
     users: "Daftar User",
     complain: "Daftar Komplain",
+    "barang-hilang": "Komplain Barang Hilang",
+    "barang-rusak": "Komplain Barang Rusak",
+    "barang-ga-sesuai": "Komplain Barang Ga Sesuai",
   };
 
   // Mapping segment ke menu group
@@ -20,6 +23,16 @@ const Breadcrumb = () => {
     transactions: "Manajemen Rekber",
     users: "Manajemen Pengguna",
     complain: "Manajemen Komplain",
+    "barang-hilang": "Komplain Center",
+    "barang-rusak": "Komplain Center",
+    "barang-ga-sesuai": "Komplain Center",
+  };
+
+  // Mapping untuk detail pages
+  const detailNameMap = {
+    "barang-hilang": "Detail Barang Hilang",
+    "barang-rusak": "Detail Barang Rusak",
+    "barang-ga-sesuai": "Detail Barang Ga Sesuai",
   };
 
   // Cari parent menu dari segment pertama
@@ -38,14 +51,29 @@ const Breadcrumb = () => {
         const isLast = index === pathnames.length - 1;
         const to = `/${pathnames.slice(0, index + 1).join("/")}`;
 
-        const displayName = isUUID(name)
-          ? firstSegment === "transactions"
-            ? "Detail Transaksi"
-            : firstSegment === "complain"
-            ? "Detail Komplain"
-            : "Detail"
-          : routeNameMap[name] ||
+        let displayName;
+
+        if (isUUID(name)) {
+          // Handle detail pages
+          if (firstSegment === "transactions") {
+            displayName = "Detail Transaksi";
+          } else if (firstSegment === "users") {
+            displayName = "Detail User";
+          } else if (firstSegment === "complain") {
+            displayName = "Detail Komplain";
+          } else {
+            displayName = "Detail";
+          }
+        } else {
+          // Handle regular routes
+          displayName = routeNameMap[name] ||
             name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, " ");
+        }
+
+        // Special handling for detail pages with specific names
+        if (isLast && detailNameMap[name]) {
+          displayName = detailNameMap[name];
+        }
 
         return (
           <div key={index} className="flex items-center gap-2">
