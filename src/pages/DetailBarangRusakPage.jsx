@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import VerticalStep from "../components/complain/VerticalStep";
+import { VerticalStepRusak } from "../components/complain/VerticalStep";
+import StatusStepSelector from "../components/complain/StatusStepSelector";
 import { Check, Info } from "lucide-react";
 import buktiPengirimanImg from "../assets/bukti-pengajuan.png";
 import Breadcrumb from "../components/BreadCrumb";
 import { STATUS, STEP_FLOW } from "../constants/complainStatusMap";
+import { mockDataTransaksiSelesai, mockDataDalamPengirimanBalik, mockDataBuyerAjukanKonfirmasi, mockDataTeruskanKonfirmasiBuyer, mockDataTolakKonfirmasiBuyer, mockDataSellerSetuju, mockDataSellerTolak, mockDataAdminSetuju, mockDataAdminTolak, mockDataMenungguAdmin, mapDataToStepProps } from "../mocks/mockBarangRusak";
+import ComplainInfoSection from '../components/ComplainInfoSection';
 
 // Data komplain, mapping dari API
 const detailKomplain = {
@@ -34,13 +37,6 @@ const mapStatusToStep = (status) => {
     }
 };
 
-const ComplainInfoSection = ({ title, children }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
-        {children}
-    </div>
-);
-
 const InfoRow = ({ label, value }) => (
     <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
         <span className="text-gray-600">{label}</span>
@@ -67,9 +63,18 @@ const formatDate = (date) => {
 };
 
 const DetailBarangRusakPage = () => {
+    console.log("DetailBarangRusakPage: Component rendering");
+
     const location = useLocation();
     const navigate = useNavigate();
     const komplainData = location.state?.data || fallbackMockData;
+    const stepStatusFromTable = location.state?.stepStatus;
+
+    console.log("DetailBarangRusakPage: komplainData", komplainData);
+    console.log("DetailBarangRusakPage: stepStatusFromTable", stepStatusFromTable);
+
+    // State untuk mengontrol status yang ditampilkan
+    const [currentStep, setCurrentStep] = useState(stepStatusFromTable || 'menungguSeller'); // 'menungguSeller', 'sellerSetuju', 'sellerTolak', 'adminSetuju', 'adminTolak', 'dalamPengirimanBalik', 'buyerAjukanKonfirmasi', 'teruskanKonfirmasiBuyer', 'tolakKonfirmasiBuyer', 'transaksiSelesai'
 
     // State dan handler identik dengan Barang Ga Sesuai
     const [status, setStatus] = useState(komplainData.status || "Persetujuan Seller");
@@ -93,6 +98,150 @@ const DetailBarangRusakPage = () => {
     // LOGIC PEMBUATAN STEPS IDENTIK DENGAN BARANG GA SESUAI
     const steps = STEP_FLOW[status] || [];
 
+    // Fungsi untuk mendapatkan mock data berdasarkan currentStep
+    const getMockDataByStep = () => {
+        console.log("DetailBarangRusakPage: getMockDataByStep called with currentStep", currentStep);
+
+        try {
+            switch (currentStep) {
+                case 'menungguSeller':
+                    return {
+                        complainType: "Barang Rusak",
+                        sellerSudahSetuju: false,
+                        sellerSudahTolak: false,
+                        adminSudahSetuju: false,
+                        adminSudahTolak: false,
+                        buyerSudahKirimResi: false,
+                        buyerMelewatkanBatasWaktu: false,
+                        dalamPengirimanBalik: false,
+                        buyerSudahAjukanKonfirmasi: false,
+                        teruskanKonfirmasiBuyer: false,
+                        tolakKonfirmasiBuyer: false,
+                        transaksiSelesai: false,
+                        waktuKomplain: komplainData.waktuKomplain || "16 Juni 2025, 10:00 WIB",
+                        isSellerSetuju: false,
+                        isAdminSetuju: false,
+                        currentStatus: 'menungguSeller'
+                    };
+                case 'sellerSetuju':
+                    return {
+                        ...mockDataSellerSetuju,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataSellerSetuju.waktuKomplain
+                    };
+                case 'sellerTolak':
+                    return {
+                        ...mockDataSellerTolak,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataSellerTolak.waktuKomplain
+                    };
+                case 'adminSetuju':
+                    return {
+                        ...mockDataAdminSetuju,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataAdminSetuju.waktuKomplain
+                    };
+                case 'adminTolak':
+                    return {
+                        ...mockDataAdminTolak,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataAdminTolak.waktuKomplain
+                    };
+                case 'menungguAdmin':
+                    return {
+                        ...mockDataMenungguAdmin,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataMenungguAdmin.waktuKomplain,
+                        currentStatus: 'menungguAdmin'
+                    };
+                case 'transaksiSelesai':
+                    return {
+                        ...mockDataTransaksiSelesai,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataTransaksiSelesai.waktuKomplain
+                    };
+                case 'komplainDibatalkan':
+                    return {
+                        complainType: "Barang Rusak",
+                        sellerSudahSetuju: false,
+                        sellerSudahTolak: false,
+                        adminSudahSetuju: false,
+                        adminSudahTolak: false,
+                        buyerSudahKirimResi: false,
+                        buyerMelewatkanBatasWaktu: false,
+                        dalamPengirimanBalik: false,
+                        buyerSudahAjukanKonfirmasi: false,
+                        teruskanKonfirmasiBuyer: false,
+                        tolakKonfirmasiBuyer: false,
+                        transaksiSelesai: false,
+                        waktuKomplain: komplainData.waktuKomplain || "16 Juni 2025, 10:00 WIB",
+                        waktuDibatalkan: komplainData.waktuDibatalkan || "17 Juni 2025, 14:00 WIB",
+                        isSellerSetuju: false,
+                        isAdminSetuju: false,
+                        currentStatus: 'komplainDibatalkan'
+                    };
+                case 'dalamPengirimanBalik':
+                    return {
+                        ...mockDataDalamPengirimanBalik,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataDalamPengirimanBalik.waktuKomplain
+                    };
+                case 'buyerAjukanKonfirmasi':
+                    return {
+                        ...mockDataBuyerAjukanKonfirmasi,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataBuyerAjukanKonfirmasi.waktuKomplain,
+                        currentStatus: 'buyerAjukanKonfirmasi'
+                    };
+                case 'teruskanKonfirmasiBuyer':
+                    return {
+                        ...mockDataTeruskanKonfirmasiBuyer,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataTeruskanKonfirmasiBuyer.waktuKomplain
+                    };
+                case 'tolakKonfirmasiBuyer':
+                    return {
+                        ...mockDataTolakKonfirmasiBuyer,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataTolakKonfirmasiBuyer.waktuKomplain
+                    };
+                default:
+                    return {
+                        ...mockDataSellerSetuju,
+                        waktuKomplain: komplainData.waktuKomplain || mockDataSellerSetuju.waktuKomplain
+                    };
+            }
+        } catch (error) {
+            console.error("DetailBarangRusakPage: Error in getMockDataByStep", error);
+            return {
+                ...mockDataSellerSetuju,
+                waktuKomplain: komplainData.waktuKomplain || mockDataSellerSetuju.waktuKomplain
+            };
+        }
+    };
+
+    // Safe mapping function with error handling
+    const getStepProps = () => {
+        try {
+            console.log("DetailBarangRusakPage: getStepProps called");
+            const mockData = getMockDataByStep();
+            console.log("DetailBarangRusakPage: mockData", mockData);
+            const props = mapDataToStepProps(mockData);
+            console.log("DetailBarangRusakPage: mapped props", props);
+            return props;
+        } catch (error) {
+            console.error("DetailBarangRusakPage: Error in getStepProps", error);
+            // Return safe fallback props
+            return {
+                complainType: "Barang Rusak",
+                sellerSudahSetuju: false,
+                sellerSudahTolak: false,
+                adminSudahSetuju: false,
+                adminSudahTolak: false,
+                buyerSudahKirimResi: false,
+                buyerMelewatkanBatasWaktu: false,
+                dalamPengirimanBalik: false,
+                buyerSudahAjukanKonfirmasi: false,
+                teruskanKonfirmasiBuyer: false,
+                tolakKonfirmasiBuyer: false,
+                transaksiSelesai: false,
+                waktuKomplain: "16 Juni 2025, 10:00 WIB",
+                isSellerSetuju: false,
+                isAdminSetuju: false,
+            };
+        }
+    };
+
     const handleSellerSetuju = () => {
         setStatus("Pengembalian Barang");
         setStatusPengajuan("Tanpa pengajuan");
@@ -109,34 +258,8 @@ const DetailBarangRusakPage = () => {
         setBuyerReturnTimestamp(null);
         setBuyerTimeout(false);
     };
-    const handleAdminSetuju = () => {
-        if (!showNewSlicing) {
-            setStatus("Pengembalian Barang");
-            setStatusPengajuan("Ditinjau");
-            setAdminActionTimestamp(formatDate(new Date()));
-            setIsRejectedByAdmin(false);
-            setResiPengembalian(null);
-            setBuyerReturnTimestamp(null);
-            setBuyerTimeout(false);
-        } else {
-            setAdminActionType('teruskan');
-            setAdminActionTimestamp(formatDate(new Date()));
-        }
-    };
-    const handleAdminTolak = () => {
-        if (!showNewSlicing) {
-            setStatus("Transaksi Selesai");
-            setStatusPengajuan("Ditolak");
-            setAdminActionTimestamp(formatDate(new Date()));
-            setIsRejectedByAdmin(true);
-            setResiPengembalian(null);
-            setBuyerReturnTimestamp(null);
-            setBuyerTimeout(false);
-        } else {
-            setAdminActionType('tolak');
-            setAdminActionTimestamp(formatDate(new Date()));
-        }
-    };
+    const handleAdminSetuju = () => setCurrentStep('adminSetuju');
+    const handleAdminTolak = () => setCurrentStep('adminTolak');
     const handleBuyerInputResi = () => {
         setResiPengembalian("RETURRUSAK123456");
         setBuyerReturnTimestamp(formatDate(new Date()));
@@ -162,9 +285,12 @@ const DetailBarangRusakPage = () => {
         setStatus("Transaksi Selesai");
         setBuyerTimeout(true);
     };
+    const handleBuyerAjukanKonfirmasiSetuju = () => setCurrentStep('teruskanKonfirmasiBuyer');
+    const handleBuyerAjukanKonfirmasiTolak = () => setCurrentStep('tolakKonfirmasiBuyer');
 
     const handleNavigateToRekberDetail = () => {
-        navigate(`/rekber-detail/${detailKomplain.komplain.idTransaksi}`);
+        const idTransaksi = detailKomplain.komplain.idTransaksi || komplainData.idTransaksi;
+        navigate(`/transactions/${idTransaksi}`);
     };
 
     // Mock nominal dan biaya (ganti dengan data API jika ada)
@@ -172,156 +298,45 @@ const DetailBarangRusakPage = () => {
     const biayaAsuransi = komplainData?.biayaAsuransi || "Rp. 16.000,00";
     const biayaJasa = komplainData?.biayaJasa || "Rp. 64.000,00";
 
-    return (
-        <div className="max-w-5xl mx-auto py-8 px-2">
-            <Breadcrumb />
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* Step Vertical di kiri */}
-                <div className="md:w-1/3 w-full">
-                    {showNewSlicing ? (
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <div className={`flex items-center p-3 mb-4 rounded-lg ${sellerConfirmTimestamp
-                                ? 'bg-[#E6F4EA] text-[#1E4620]'
-                                : 'bg-[#FEF3C7] text-[#92400E]'
-                                }`}>
-                                {sellerConfirmTimestamp ? (
-                                    <Check className="w-5 h-5 mr-3" />
-                                ) : (
-                                    <svg width="20" height="20" viewBox="0 0 20 20" className="mr-3">
-                                        <circle cx="10" cy="10" r="9" fill="none" stroke="#92400E" strokeWidth="2" />
-                                        <path d="M10 6V10" stroke="#92400E" strokeWidth="2" strokeLinecap="round" />
-                                        <circle cx="10" cy="14" r="1" fill="#92400E" />
-                                    </svg>
-                                )}
-                                <span className="text-base font-semibold">
-                                    {sellerConfirmTimestamp ? 'Transaksi selesai' : 'Menunggu Pengembalian'}
-                                </span>
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Tracking Komplain</h2>
-                                <p className="text-lg text-gray-600 mb-6">Barang Rusak</p>
-                                <ol>
-                                    <div className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-7 h-7 flex items-center justify-center">
-                                                <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
-                                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                                        <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
-                                        </div>
-                                        <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                            <span className="text-base font-medium text-[#1c1c1c]">Waktu buat komplain</span>
-                                            <span className="text-base font-bold text-gray-800">{waktuBuatKomplain}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-7 h-7 flex items-center justify-center">
-                                                <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
-                                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                                        <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
-                                        </div>
-                                        <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                            <span className="text-base font-medium text-[#1c1c1c]">Seller menyetujui komplain</span>
-                                            <span className="text-base font-bold text-gray-800">{waktuSellerSetuju}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-7 h-7 flex items-center justify-center">
-                                                <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
-                                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                                        <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
-                                        </div>
-                                        <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                            <span className="text-base font-medium text-[#1c1c1c]">Buyer kirim resi pengembalian</span>
-                                            <span className="text-base font-bold text-gray-800">{waktuBuyerInputResi}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-7 h-7 flex items-center justify-center">
-                                                <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
-                                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                                        <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
-                                        </div>
-                                        <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                            <span className="text-base font-medium text-[#1c1c1c]">Dalam Pengiriman Balik</span>
-                                            <span className="text-base font-bold text-gray-800">Barang sedang dalam perjalanan</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-7 h-7 flex items-center justify-center -ml-[2px]">
-                                                <div className={`w-6 h-6 rounded-full box-border flex items-center justify-center ${adminActionType ? 'bg-[#066afe] border-[#066afe]' : 'border-2 border-[#066afe] bg-white'
-                                                    }`}>
-                                                    {adminActionType && (
-                                                        <svg width="16" height="16" viewBox="0 0 16 16">
-                                                            <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                        </svg>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {adminActionType && <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />}
-                                        </div>
-                                        <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                            <span className={`text-base font-medium ${adminActionType ? 'text-[#1c1c1c]' : 'text-[#066afe] font-semibold'
-                                                }`}>Buyer pengajuan konfirmasi</span>
-                                            <span className="text-base font-bold text-gray-800">{buyerConfirmTimestamp}</span>
-                                        </div>
-                                    </div>
-                                    {adminActionType && (
-                                        <div className="flex gap-4">
-                                            <div className="flex flex-col items-center">
-                                                <div className={`w-7 h-7 flex items-center justify-center`}>
-                                                    <div className={`w-6 h-6 rounded-full box-border flex items-center justify-center ${sellerConfirmTimestamp
-                                                        ? 'bg-[#066afe] border-[#066afe]'
-                                                        : adminActionType === 'teruskan'
-                                                            ? 'bg-white border-4 border-blue-600'
-                                                            : 'border-2 border-[#C30052] bg-white'
-                                                        }`}>
-                                                        {sellerConfirmTimestamp ? (
-                                                            <svg width="16" height="16" viewBox="0 0 16 16">
-                                                                <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
-                                                            </svg>
-                                                        ) : adminActionType === 'teruskan' ? (
-                                                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                                                        ) : (
-                                                            <div className="w-2 h-2 bg-[#C30052] rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {sellerConfirmTimestamp && <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />}
-                                            </div>
-                                            <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                                <span className={`text-base font-medium ${sellerConfirmTimestamp
-                                                    ? 'text-[#1c1c1c]'
-                                                    : adminActionType === 'teruskan'
-                                                        ? 'text-[#066afe] font-semibold'
-                                                        : 'text-[#C30052] font-semibold'
-                                                    }`}>
-                                                    {adminActionType === 'teruskan' ? 'Admin meneruskan pengajuan' : 'Admin menolak pengajuan'}
-                                                </span>
-                                                <span className="text-base font-bold text-gray-800">{adminActionTimestamp}</span>
-                                            </div>
-                                        </div>
+    // Handler untuk perubahan step
+    const handleStepChange = (newStep) => {
+        console.log("DetailBarangRusakPage: Changing step from", currentStep, "to", newStep);
+        setCurrentStep(newStep);
+    };
+
+    try {
+        console.log("DetailBarangRusakPage: About to render");
+
+        return (
+            <div className="max-w-5xl mx-auto py-8 px-2">
+                <Breadcrumb />
+
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Step Vertical di kiri */}
+                    <div className="md:w-1/3 w-full">
+                        {showNewSlicing ? (
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <div className={`flex items-center p-3 mb-4 rounded-lg ${sellerConfirmTimestamp
+                                    ? 'bg-[#E6F4EA] text-[#1E4620]'
+                                    : 'bg-[#FEF3C7] text-[#92400E]'
+                                    }`}>
+                                    {sellerConfirmTimestamp ? (
+                                        <Check className="w-5 h-5 mr-3" />
+                                    ) : (
+                                        <svg width="20" height="20" viewBox="0 0 20 20" className="mr-3">
+                                            <circle cx="10" cy="10" r="9" fill="none" stroke="#92400E" strokeWidth="2" />
+                                            <path d="M10 6V10" stroke="#92400E" strokeWidth="2" strokeLinecap="round" />
+                                            <circle cx="10" cy="14" r="1" fill="#92400E" />
+                                        </svg>
                                     )}
-                                    {sellerConfirmTimestamp && (
+                                    <span className="text-base font-semibold">
+                                        {sellerConfirmTimestamp ? 'Transaksi selesai' : 'Menunggu Pengembalian'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">Tracking Komplain</h2>
+                                    <p className="text-lg text-gray-600 mb-6">Barang Rusak</p>
+                                    <ol>
                                         <div className="flex gap-4">
                                             <div className="flex flex-col items-center">
                                                 <div className="w-7 h-7 flex items-center justify-center">
@@ -331,136 +346,216 @@ const DetailBarangRusakPage = () => {
                                                         </svg>
                                                     </div>
                                                 </div>
+                                                <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
                                             </div>
                                             <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
-                                                <span className="text-base font-medium text-[#1c1c1c]">Konfirmasi seller dan dana refunded</span>
-                                                <span className="text-base font-bold text-gray-800">{sellerConfirmTimestamp}</span>
+                                                <span className="text-base font-medium text-[#1c1c1c]">Waktu buat komplain</span>
+                                                <span className="text-base font-bold text-gray-800">{waktuBuatKomplain}</span>
                                             </div>
                                         </div>
-                                    )}
-                                </ol>
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-7 h-7 flex items-center justify-center">
+                                                    <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
+                                                        <svg width="16" height="16" viewBox="0 0 16 16">
+                                                            <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
+                                            </div>
+                                            <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                <span className="text-base font-medium text-[#1c1c1c]">Seller menyetujui komplain</span>
+                                                <span className="text-base font-bold text-gray-800">{waktuSellerSetuju}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-7 h-7 flex items-center justify-center">
+                                                    <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
+                                                        <svg width="16" height="16" viewBox="0 0 16 16">
+                                                            <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
+                                            </div>
+                                            <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                <span className="text-base font-medium text-[#1c1c1c]">Buyer kirim resi pengembalian</span>
+                                                <span className="text-base font-bold text-gray-800">{waktuBuyerInputResi}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-7 h-7 flex items-center justify-center">
+                                                    <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
+                                                        <svg width="16" height="16" viewBox="0 0 16 16">
+                                                            <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />
+                                            </div>
+                                            <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                <span className="text-base font-medium text-[#1c1c1c]">Dalam Pengiriman Balik</span>
+                                                <span className="text-base font-bold text-gray-800">Barang sedang dalam perjalanan</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-7 h-7 flex items-center justify-center -ml-[2px]">
+                                                    <div className={`w-6 h-6 rounded-full box-border flex items-center justify-center ${adminActionType ? 'bg-[#066afe] border-[#066afe]' : 'border-2 border-[#066afe] bg-white'
+                                                        }`}>
+                                                        {adminActionType && (
+                                                            <svg width="16" height="16" viewBox="0 0 16 16">
+                                                                <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                            </svg>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {adminActionType && <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />}
+                                            </div>
+                                            <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                <span className={`text-base font-medium ${adminActionType ? 'text-[#1c1c1c]' : 'text-[#066afe] font-semibold'
+                                                    }`}>Buyer pengajuan konfirmasi</span>
+                                                <span className="text-base font-bold text-gray-800">{buyerConfirmTimestamp}</span>
+                                            </div>
+                                        </div>
+                                        {adminActionType && (
+                                            <div className="flex gap-4">
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`w-7 h-7 flex items-center justify-center`}>
+                                                        <div className={`w-6 h-6 rounded-full box-border flex items-center justify-center ${sellerConfirmTimestamp
+                                                            ? 'bg-[#066afe] border-[#066afe]'
+                                                            : adminActionType === 'teruskan'
+                                                                ? 'bg-white border-4 border-blue-600'
+                                                                : 'border-2 border-[#C30052] bg-white'
+                                                            }`}>
+                                                            {sellerConfirmTimestamp ? (
+                                                                <svg width="16" height="16" viewBox="0 0 16 16">
+                                                                    <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                                </svg>
+                                                            ) : adminActionType === 'teruskan' ? (
+                                                                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                                            ) : (
+                                                                <div className="w-2 h-2 bg-[#C30052] rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {sellerConfirmTimestamp && <div className="w-0.5 h-12 bg-[#066afe] ml-[0px]" />}
+                                                </div>
+                                                <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                    <span className={`text-base font-medium ${sellerConfirmTimestamp
+                                                        ? 'text-[#1c1c1c]'
+                                                        : adminActionType === 'teruskan'
+                                                            ? 'text-[#066afe] font-semibold'
+                                                            : 'text-[#C30052] font-semibold'
+                                                        }`}>
+                                                        {adminActionType === 'teruskan' ? 'Admin meneruskan pengajuan' : 'Admin menolak pengajuan'}
+                                                    </span>
+                                                    <span className="text-base font-bold text-gray-800">{adminActionTimestamp}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {sellerConfirmTimestamp && (
+                                            <div className="flex gap-4">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-7 h-7 flex items-center justify-center">
+                                                        <div className="w-6 h-6 rounded-full box-border flex items-center justify-center bg-[#066afe] border-[#066afe]">
+                                                            <svg width="16" height="16" viewBox="0 0 16 16">
+                                                                <path d="M3 8L7 12L13 4" stroke="white" strokeWidth="2" fill="none" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col gap-1 pb-6 -mt-1 ml-2">
+                                                    <span className="text-base font-medium text-[#1c1c1c]">Konfirmasi seller dan dana refunded</span>
+                                                    <span className="text-base font-bold text-gray-800">{sellerConfirmTimestamp}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </ol>
+                                </div>
+                                {!adminActionType && (
+                                    <div className="flex gap-4 mt-8">
+                                        <button onClick={handleAdminTolak} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#FDE8EF] text-[#C30052] hover:bg-[#F9D6E2]">Tolak</button>
+                                        <button onClick={handleAdminSetuju} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#0066FF] text-white hover:bg-[#005FCC]">Teruskan</button>
+                                    </div>
+                                )}
+                                {adminActionType && !sellerConfirmTimestamp && (
+                                    <div className="flex gap-4 mt-8">
+                                        <button onClick={handleSellerConfirmReceived} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#E6F4EA] text-[#1E4620] hover:bg-[#D4EDDA]">Simulate Seller Konfirmasi Diterima</button>
+                                    </div>
+                                )}
                             </div>
-                            {!adminActionType && (
-                                <div className="flex gap-4 mt-8">
-                                    <button onClick={handleAdminTolak} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#FDE8EF] text-[#C30052] hover:bg-[#F9D6E2]">Tolak</button>
-                                    <button onClick={handleAdminSetuju} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#0066FF] text-white hover:bg-[#005FCC]">Teruskan</button>
-                                </div>
-                            )}
-                            {adminActionType && !sellerConfirmTimestamp && (
-                                <div className="flex gap-4 mt-8">
-                                    <button onClick={handleSellerConfirmReceived} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#E6F4EA] text-[#1E4620] hover:bg-[#D4EDDA]">Simulate Seller Konfirmasi Diterima</button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <VerticalStep
-                            type="rusak"
-                            complainType="Barang Rusak"
-                            currentStatus={status}
-                            steps={steps}
-                            onTolak={handleAdminTolak}
-                            onSetuju={handleAdminSetuju}
-                            adminActionTimestamp={waktuAdminSetuju}
-                            isRejectedByAdmin={isRejectedByAdmin}
-                            statusPengajuan={statusPengajuan}
-                            resiPengembalian={resiPengembalian}
-                            buyerReturnTimestamp={waktuBuyerInputResi}
+                        ) : (
+                            <div>
+                                <VerticalStepRusak
+                                    complainType="Barang Rusak"
+                                    {...getStepProps()}
+                                    onTolak={
+                                        currentStep === 'menungguAdmin'
+                                            ? handleAdminTolak
+                                            : currentStep === 'buyerAjukanKonfirmasi'
+                                                ? handleBuyerAjukanKonfirmasiTolak
+                                                : undefined
+                                    }
+                                    onSetuju={
+                                        currentStep === 'menungguAdmin'
+                                            ? handleAdminSetuju
+                                            : currentStep === 'buyerAjukanKonfirmasi'
+                                                ? handleBuyerAjukanKonfirmasiSetuju
+                                                : undefined
+                                    }
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex-1 flex flex-col gap-8">
+                        <ComplainInfoSection
+                            data={{
+                                id: komplainData.id,
+                                idTransaksi: detailKomplain.komplain.idTransaksi,
+                                nama: komplainData.nama,
+                                pembeli: komplainData.pembeli,
+                                seller: detailKomplain.komplain.seller.email,
+                                noResi: komplainData.noResi,
+                                ekspedisi: komplainData.ekspedisi,
+                                tagihanRekber: komplainData.tagihanRekber,
+                                nominalBarang: nominalBarang,
+                                biayaAsuransi: biayaAsuransi,
+                                biayaJasa: biayaJasa,
+                            }}
+                            onDetailRekberClick={handleNavigateToRekberDetail}
                         />
-                    )}
-                    <div className="mt-6 flex flex-col gap-2">
-                        {status === "Persetujuan Seller" && (
-                            <>
-                                <button onClick={handleSellerSetuju} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Seller Setuju</button>
-                                <button onClick={handleSellerTolak} className="bg-red-500 text-white px-4 py-2 rounded">Simulate Seller Tolak</button>
-                            </>
-                        )}
-                        {status === "Persetujuan Admin" && (
-                            <>
-                                <button onClick={handleAdminSetuju} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Admin Setuju</button>
-                                <button onClick={handleAdminTolak} className="bg-red-500 text-white px-4 py-2 rounded">Simulate Admin Tolak</button>
-                            </>
-                        )}
-                        {status === "Pengembalian Barang" && !resiPengembalian && !buyerTimeout && (
-                            <>
-                                <button onClick={handleBuyerInputResi} className="bg-green-600 text-white px-4 py-2 rounded mb-2">Simulate Buyer Input Resi</button>
-                                <button onClick={handleBuyerTimeout} className="bg-gray-500 text-white px-4 py-2 rounded">Simulate Buyer Melewati Batas Waktu</button>
-                            </>
-                        )}
-                        {status === "Pengembalian Barang" && resiPengembalian && !buyerTimeout && !buyerConfirmTimestamp && (
-                            <>
-                                <button onClick={handleBuyerConfirm} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Buyer Ajukan Konfirmasi</button>
-                                <button onClick={handleBuyerNoConfirm} className="bg-gray-500 text-white px-4 py-2 rounded">Simulate Tanpa Pengajuan Konfirmasi</button>
-                            </>
-                        )}
                     </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-8">
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900 font-sf-pro">Informasi Komplain</h2>
-                            <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold text-base font-sf-pro transition"
-                                onClick={handleNavigateToRekberDetail}
-                            >
-                                Lihat Detail Rekber
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">ID Komplain</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{komplainData.id}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">ID Transaksi</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{detailKomplain.komplain.idTransaksi}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Nama Barang</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{komplainData.nama}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Buyer</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{komplainData.pembeli}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Seller</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{detailKomplain.komplain.seller.email}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">No Resi Ekspedisi</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro tracking-widest">{komplainData.noResi}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Ekspedisi</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{komplainData.ekspedisi}</span>
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Tagihan Rekber</p>
-                                    <div className="bg-gray-100 rounded px-4 py-2 text-lg font-bold text-gray-900 font-sf-pro">Rp. 8.080.000,00</div>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Nominal Barang</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{nominalBarang}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Asuransi Pengiriman BNI Life (0.2%)</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{biayaAsuransi}</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi (0.8 %)</p>
-                                    <span className="text-sm font-medium text-gray-900 font-sf-pro">{biayaJasa}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {!komplainData && <div>Data komplain tidak ditemukan.</div>}
+            </div>
+        );
+    } catch (error) {
+        console.error("DetailBarangRusakPage: Error during render", error);
+        return (
+            <div className="max-w-5xl mx-auto py-8 px-2">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h2 className="text-xl font-semibold text-red-800 mb-2">Error Loading Page</h2>
+                    <p className="text-red-600 mb-4">Terjadi kesalahan saat memuat halaman detail barang rusak.</p>
+                    <details className="text-sm text-red-700">
+                        <summary className="cursor-pointer font-medium">Error Details</summary>
+                        <pre className="mt-2 bg-red-100 p-2 rounded text-xs overflow-auto">
+                            {error.message}
+                        </pre>
+                    </details>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                        Reload Page
+                    </button>
                 </div>
             </div>
-            {!komplainData && <div>Data komplain tidak ditemukan.</div>}
-        </div>
-    );
+        );
+    }
 };
 
 export default DetailBarangRusakPage; 

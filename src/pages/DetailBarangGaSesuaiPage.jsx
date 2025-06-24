@@ -4,6 +4,8 @@ import VerticalStep from "../components/complain/VerticalStep";
 import buktiPengirimanImg from "../assets/contoh-resi.png";
 import Breadcrumb from "../components/BreadCrumb";
 import { Check } from "lucide-react";
+import { mapTableStatusToStepStatus, mapDataToStepPropsGaSesuai } from "../components/table/DataTableBarangGaSesuai";
+import ComplainInfoSection from '../components/ComplainInfoSection';
 
 const detailKomplain = {
     komplain: {
@@ -12,13 +14,6 @@ const detailKomplain = {
         seller: { email: "seller_shop@gmail.com" },
     }
 };
-
-const ComplainInfoSection = ({ title, children }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
-        {children}
-    </div>
-);
 
 const InfoRow = ({ label, value }) => (
     <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
@@ -202,14 +197,27 @@ const DetailBarangGaSesuaiPage = () => {
     }
 
     const handleNavigateToRekberDetail = () => {
-        navigate(`/rekber-detail/${detailKomplain.komplain.idTransaksi}`);
+        const idTransaksi = detailKomplain.komplain.idTransaksi || komplainData.idTransaksi;
+        navigate(`/transactions/${idTransaksi}`);
     };
 
+    const stepStatus = mapTableStatusToStepStatus(status, statusPengajuan);
+
+    // Mapping data ke prop step jika status Transaksi Selesai
+    let stepProps = {};
+    if (
+        status === "Transaksi Selesai" ||
+        (status === "Pengembalian Barang" && statusPengajuan === "Menunggu Seller") ||
+        (status === "Pengembalian Barang" && statusPengajuan === "Ditolak")
+    ) {
+        stepProps = mapDataToStepPropsGaSesuai(komplainData);
+    }
+
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-5xl mx-auto py-8 px-2">
             <Breadcrumb />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
+            <div className="flex flex-col md:flex-row gap-8">
+                <div className="md:w-1/3 w-full">
                     {showNewSlicing ? (
                         <div className="bg-white p-6 rounded-lg shadow-md">
                             <div className={`flex items-center p-3 mb-4 rounded-lg ${sellerConfirmTimestamp
@@ -388,7 +396,7 @@ const DetailBarangGaSesuaiPage = () => {
                         <VerticalStep
                             type="rusak"
                             complainType="Barang Ga Sesuai"
-                            currentStatus={status}
+                            currentStatus={stepStatus}
                             steps={steps}
                             onTolak={handleAdminTolak}
                             onSetuju={handleAdminSetuju}
@@ -397,67 +405,27 @@ const DetailBarangGaSesuaiPage = () => {
                             statusPengajuan={statusPengajuan}
                             resiPengembalian={resiPengembalian}
                             buyerReturnTimestamp={waktuBuyerInputResi}
+                            {...stepProps}
                         />
                     )}
-                    <div className="mt-6 flex flex-col gap-2">
-                        {status === "Persetujuan Seller" && (
-                            <>
-                                <button onClick={handleSellerSetuju} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Seller Setuju</button>
-                                <button onClick={handleSellerTolak} className="bg-red-500 text-white px-4 py-2 rounded">Simulate Seller Tolak</button>
-                            </>
-                        )}
-                        {status === "Persetujuan Admin" && (
-                            <>
-                                <button onClick={handleAdminSetuju} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Admin Setuju</button>
-                                <button onClick={handleAdminTolak} className="bg-red-500 text-white px-4 py-2 rounded">Simulate Admin Tolak</button>
-                            </>
-                        )}
-                        {status === "Pengembalian Barang" && !resiPengembalian && !buyerTimeout && (
-                            <>
-                                <button onClick={handleBuyerInputResi} className="bg-green-600 text-white px-4 py-2 rounded mb-2">Simulate Buyer Input Resi</button>
-                                <button onClick={handleBuyerTimeout} className="bg-gray-500 text-white px-4 py-2 rounded">Simulate Buyer Melewati Batas Waktu</button>
-                            </>
-                        )}
-                        {status === "Pengembalian Barang" && resiPengembalian && !buyerTimeout && !buyerConfirmTimestamp && (
-                            <>
-                                <button onClick={handleBuyerConfirm} className="bg-blue-600 text-white px-4 py-2 rounded mb-2">Simulate Buyer Ajukan Konfirmasi</button>
-                                <button onClick={handleBuyerNoConfirm} className="bg-gray-500 text-white px-4 py-2 rounded">Simulate Tanpa Pengajuan Konfirmasi</button>
-                            </>
-                        )}
-                    </div>
                 </div>
-                <div className="lg:col-span-2">
-                    <ComplainInfoSection title="Informasi Komplain">
-                        <InfoRow label="ID Komplain" value={komplainData.id} />
-                        <InfoRow label="ID Transaksi" value={detailKomplain.komplain.idTransaksi} />
-                        <InfoRow label="Nama Barang" value={komplainData.nama} />
-                        <InfoRow label="Status" value={status} />
-                        <InfoRow label="Pembeli" value={komplainData.pembeli} />
-                        <InfoRow label="Penjual" value={detailKomplain.komplain.seller.email} />
-                        <div className="mt-4 flex justify-end">
-                            <button
-                                onClick={handleNavigateToRekberDetail}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                            >
-                                Lihat Detail Rekber
-                            </button>
-                        </div>
-                    </ComplainInfoSection>
-
-                    <ComplainInfoSection title="Bukti Pengajuan Pembeli">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h3 className="font-semibold mb-2">Video Unboxing Paket</h3>
-                                <div className="aspect-video bg-gray-200 rounded-md flex items-center justify-center">
-                                    <span className="text-gray-500">Video Placeholder</span>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="font-semibold mb-2">Foto Barang</h3>
-                                <img src={buktiPengirimanImg} alt="Bukti barang" className="rounded-md w-full" />
-                            </div>
-                        </div>
-                    </ComplainInfoSection>
+                <div className="flex-1 flex flex-col gap-8">
+                    <ComplainInfoSection
+                        data={{
+                            id: komplainData.id,
+                            idTransaksi: detailKomplain.komplain.idTransaksi,
+                            nama: komplainData.nama,
+                            pembeli: komplainData.pembeli,
+                            seller: detailKomplain.komplain.seller.email,
+                            noResi: komplainData.noResi,
+                            ekspedisi: komplainData.ekspedisi,
+                            tagihanRekber: komplainData.tagihanRekber,
+                            nominalBarang: komplainData.nominalBarang,
+                            biayaAsuransi: komplainData.biayaAsuransi,
+                            biayaJasa: komplainData.biayaJasa,
+                        }}
+                        onDetailRekberClick={handleNavigateToRekberDetail}
+                    />
                 </div>
             </div>
         </div>
