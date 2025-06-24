@@ -53,44 +53,46 @@ const UserTable = ({
           </div>
 
           {loading ? (
-            <table class='border-collapse border border-[#c9c9c9] w-full animate-pulse'>
+            <table className='border-collapse border border-[#c9c9c9] w-full animate-pulse'>
               <thead>
-                <tr class='bg-[#f3f3f3] border-b border-[#c9c9c9]'>
-                  <th class='px-2 text-sm text-[#5c5c5c] min-w-[120px]'>
-                    <div class='bg-gray-200 h-4 min-w-[120px] rounded'></div>
+                <tr className='bg-[#f3f3f3] border-b border-[#c9c9c9]'>
+                  <th className='px-2 text-sm text-[#5c5c5c] min-w-[120px]'>
+                    <div className='bg-gray-200 h-4 min-w-[120px] rounded'></div>
                   </th>
-                  <th class='px-2 text-sm text-[#5c5c5c] min-w-[200px]'>
-                    <div class='bg-gray-200 h-4 min-w-[200px] rounded'></div>
+                  <th className='px-2 text-sm text-[#5c5c5c] min-w-[200px]'>
+                    <div className='bg-gray-200 h-4 min-w-[200px] rounded'></div>
                   </th>
-                  <th class='px-2 text-sm text-[#5c5c5c] min-w-[180px]'>
-                    <div class='bg-gray-200 h-4 min-w-[180px] rounded'></div>
+                  <th className='px-2 text-sm text-[#5c5c5c] min-w-[180px]'>
+                    <div className='bg-gray-200 h-4 min-w-[180px] rounded'></div>
                   </th>
-                  <th class='px-2 text-sm text-[#5c5c5c] min-w-[120px]'>
-                    <div class='bg-gray-200 h-4 min-w-[120px] rounded'></div>
+                  <th className='px-2 text-sm text-[#5c5c5c] min-w-[120px]'>
+                    <div className='bg-gray-200 h-4 min-w-[120px] rounded'></div>
                   </th>
-                  <th class='w-[52px]'>
-                    <div class='bg-gray-200 h-4 w-[52px] rounded'></div>
+                  <th className='w-[52px]'>
+                    <div className='bg-gray-200 h-4 w-[52px] rounded'></div>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr class='h-[38px] border-b border-[#c9c9c9] bg-white'>
-                  <td class='px-2 text-sm text-[#5c5c5c]'>
-                    <div class='bg-gray-200 h-4 w-full rounded'></div>
-                  </td>
-                  <td class='px-2 text-sm text-[#5c5c5c]'>
-                    <div class='bg-gray-200 h-4 w-full rounded'></div>
-                  </td>
-                  <td class='px-2 text-sm text-[#5c5c5c]'>
-                    <div class='bg-gray-200 h-4 w-full rounded'></div>
-                  </td>
-                  <td class='px-2 text-sm text-[#5c5c5c]'>
-                    <div class='bg-gray-200 h-4 w-full rounded'></div>
-                  </td>
-                  <td class='text-center'>
-                    <div class='bg-gray-200 h-4 rounded'></div>
-                  </td>
-                </tr>
+                {[...Array(5)].map((_, index) => (
+                  <tr key={index} className='h-[38px] border-b border-[#c9c9c9] bg-white'>
+                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                      <div className='bg-gray-200 h-4 w-full rounded'></div>
+                    </td>
+                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                      <div className='bg-gray-200 h-4 w-full rounded'></div>
+                    </td>
+                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                      <div className='bg-gray-200 h-4 w-full rounded'></div>
+                    </td>
+                    <td className='px-2 text-sm text-[#5c5c5c]'>
+                      <div className='bg-gray-200 h-4 w-full rounded'></div>
+                    </td>
+                    <td className='text-center'>
+                      <div className='bg-gray-200 h-4 rounded'></div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
@@ -116,9 +118,8 @@ const UserTable = ({
                 {users.map((user, index) => (
                   <TableRow
                     key={user.id}
-                    className={`h-[38px] border-b border-[#c9c9c9] ${
-                      index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"
-                    } hover:bg-[#e6f7ff]`}
+                    className={`h-[38px] border-b border-[#c9c9c9] ${index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"
+                      } hover:bg-[#e6f7ff]`}
                   >
                     <TableCell className='px-2 py-0 border-r border-[#c9c9c9] text-sm text-[#5c5c5c]'>
                       {user.id}
@@ -138,7 +139,7 @@ const UserTable = ({
                       {mapKYCStatusToUI(user.kycStatus)}
                     </TableCell>
                     <TableCell className='text-center'>
-                      <ArrowRightIcon 
+                      <ArrowRightIcon
                         onClick={() => navigate(`/users/${user.id}`)} className='w-4 h-4 text-[#5c5c5c] hover:text-blue-600 cursor-pointer' />
                     </TableCell>
                   </TableRow>
@@ -161,11 +162,10 @@ const UserTable = ({
             <button
               key={index + 1}
               onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${
-                currentPage === index + 1
+              className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${currentPage === index + 1
                   ? "bg-blue-500 text-white"
                   : "bg-white text-[#5c5c5c] hover:bg-[#e6f7ff]"
-              }`}
+                }`}
             >
               {index + 1}
             </button>

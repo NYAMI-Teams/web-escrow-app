@@ -80,10 +80,21 @@ const Sidebar = () => {
             Manajemen Komplain
           </b>
           {renderNavItem(
-            "/dispute",
-            <Shuffle className='w-4 h-4 stroke-current' />,
-            "Komplain"
+            "/barang-hilang",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Hilang"
           )}
+          {renderNavItem(
+            "/barang-rusak",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Rusak"
+          )}
+          {renderNavItem(
+            "/barang-ga-sesuai",
+            <Shuffle className="w-4 h-4 stroke-current" />,
+            "Barang Ga Sesuai"
+          )}
+          
         </nav>
       </div>
 

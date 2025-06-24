@@ -1,16 +1,23 @@
+import React from 'react';
 import { X } from "lucide-react";
 
-const ButtonMultiDropdown = ({ placeholder, options, value, onChange }) => {
+const ButtonMultiDropdown = ({
+  placeholder,
+  options,
+  selectedValues = [],
+  onSelectionChange,
+  isDisabled = false
+}) => {
   const toggleSelect = (item) => {
-    if (value.includes(item)) {
-      onChange(value.filter((i) => i !== item));
+    if (selectedValues.includes(item)) {
+      onSelectionChange(selectedValues.filter((i) => i !== item));
     } else {
-      onChange([...value, item]);
+      onSelectionChange([...selectedValues, item]);
     }
   };
 
   const removeItem = (item) => {
-    onChange(value.filter((i) => i !== item));
+    onSelectionChange(selectedValues.filter((i) => i !== item));
   };
 
   return (
@@ -18,36 +25,39 @@ const ButtonMultiDropdown = ({ placeholder, options, value, onChange }) => {
       <select
         onChange={(e) => {
           const selectedValue = e.target.value;
-          if (selectedValue && !value.includes(selectedValue)) {
-            onChange([...value, selectedValue]);
+          if (selectedValue && !selectedValues.includes(selectedValue)) {
+            onSelectionChange([...selectedValues, selectedValue]);
           }
           e.target.value = ""; // reset select ke placeholder setelah select
         }}
-        className="w-full h-8 bg-white border border-dimgray rounded-lg px-2 text-[13px] outline-none"
+        disabled={isDisabled}
+        className={`w-full h-8 bg-white border border-dimgray rounded-lg px-2 text-[13px] outline-none ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
       >
         <option value="">{placeholder}</option>
         {options.map((option, idx) => (
-          <option key={idx} value={option}>
-            {option}
+          <option key={idx} value={option.value || option}>
+            {option.label || option}
           </option>
         ))}
       </select>
 
       {/* Selected Tags */}
       <div className="flex flex-wrap gap-1">
-        {value.map((item, idx) => (
+        {selectedValues.map((item, idx) => (
           <div
             key={idx}
-            className="rounded-[20px] bg-white border border-dimgray h-[26px] flex items-center py-1 pl-2 pr-1 gap-1"
+            className="flex items-center border border-blue-600 text-blue-600 rounded-full px-2 py-[2px] text-[11px] leading-none bg-blue-50"
           >
-            <div className="text-[13px] leading-[18px] overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="text-[11px] leading-none overflow-hidden text-ellipsis whitespace-nowrap">
               {item}
             </div>
             <button
-              className="rounded-full p-0.5 hover:bg-gray-200"
+              className="ml-1 font-bold text-xs hover:text-blue-800 transition-colors"
               onClick={() => removeItem(item)}
+              disabled={isDisabled}
             >
-              <X className="w-3.5 h-3.5" />
+              ×
             </button>
           </div>
         ))}
