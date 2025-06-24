@@ -123,7 +123,7 @@ const DetailBarangRusakPage = () => {
             </div>
           </ComplainInfoSection>
         </div>
-      </div>
+      </div>  
     </div>
   );
 };
