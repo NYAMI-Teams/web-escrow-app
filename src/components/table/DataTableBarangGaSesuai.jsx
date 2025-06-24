@@ -62,7 +62,7 @@ const initialData = [
         ekspedisi: "J&T Express Indonesia",
         status: "Persetujuan Seller",
         asuransi: true,
-        statusPengajuan: null,
+        statusPengajuan: "Tanpa pengajuan",
     },
     {
         id: "GS2345678902",
@@ -73,7 +73,7 @@ const initialData = [
         ekspedisi: "JNE Indonesia",
         status: "Dibatalkan",
         asuransi: false,
-        statusPengajuan: null,
+        statusPengajuan: "Tanpa pengajuan",
     },
     {
         id: "GS2345678903",
@@ -95,7 +95,7 @@ const initialData = [
         ekspedisi: "Pos Indonesia",
         status: "Persetujuan Admin",
         asuransi: false,
-        statusPengajuan: null,
+        statusPengajuan: "Tanpa pengajuan",
     },
     {
         id: "GS2345678905",
@@ -106,7 +106,7 @@ const initialData = [
         ekspedisi: "J&T Express Indonesia",
         status: "Transaksi Selesai",
         asuransi: true,
-        statusPengajuan: null,
+        statusPengajuan: "Tanpa pengajuan",
     },
     {
         id: "GS2345678906",
@@ -139,7 +139,7 @@ const initialData = [
         ekspedisi: "Anteraja",
         status: "Persetujuan Seller",
         asuransi: false,
-        statusPengajuan: null,
+        statusPengajuan: "Tanpa pengajuan",
     },
     {
         id: "GS2345678909",
@@ -199,18 +199,221 @@ const initialData = [
     {
         id: "GS2345678914",
         waktu: "2 Juli 2025",
-        nama: "Jas Hujan",
+        nama: "Jas Formal",
         pembeli: "user19@example.com",
         noResi: "GS3474124026",
-        ekspedisi: "Pos Indonesia",
+        ekspedisi: "JNE Indonesia",
+        status: "Transaksi Selesai",
+        asuransi: true,
+        statusPengajuan: "Tanpa pengajuan",
+        sellerSudahSetuju: true,
+        buyerSudahKirimResi: true,
+        buyerSudahAjukanKonfirmasi: true,
+        teruskanKonfirmasiBuyer: true,
+        transaksiSelesai: true,
+        statusSeller: "setuju",
+        statusAdmin: "setuju",
+        waktuKomplain: "30 Juni 2025, 09:00 WIB",
+        waktuSellerSetuju: "30 Juni 2025, 10:00 WIB",
+        waktuBuyerKirimResi: "1 Juli 2025, 09:00 WIB",
+        waktuBuyerAjukanKonfirmasi: "1 Juli 2025, 15:00 WIB",
+        waktuTeruskanKonfirmasiBuyer: "2 Juli 2025, 10:00 WIB",
+        waktuTransaksiSelesai: "2 Juli 2025, 16:00 WIB",
+    },
+    {
+        id: "GS2345678915",
+        waktu: "3 Juli 2025",
+        nama: "Sepatu Formal",
+        pembeli: "user20@example.com",
+        noResi: "GS3474124027",
+        ekspedisi: "J&T Express Indonesia",
         status: "Pengembalian Barang",
-        asuransi: false,
+        asuransi: true,
+        statusPengajuan: "Menunggu Seller",
+        sellerSudahSetuju: true,
+        buyerSudahKirimResi: true,
+        buyerSudahAjukanKonfirmasi: true,
+        teruskanKonfirmasiBuyer: true,
+        dalamPengirimanBalik: true,
+        statusSeller: "setuju",
+        waktuKomplain: "1 Juli 2025, 09:00 WIB",
+        waktuSellerSetuju: "1 Juli 2025, 10:00 WIB",
+        waktuBuyerKirimResi: "2 Juli 2025, 09:00 WIB",
+        waktuBuyerAjukanKonfirmasi: "2 Juli 2025, 15:00 WIB",
+        waktuTeruskanKonfirmasiBuyer: "3 Juli 2025, 10:00 WIB",
+    },
+    {
+        id: "GS2345678916",
+        waktu: "4 Juli 2025",
+        nama: "Tas Kerja",
+        pembeli: "user21@example.com",
+        noResi: "GS3474124028",
+        ekspedisi: "JNE Indonesia",
+        status: "Pengembalian Barang",
+        asuransi: true,
         statusPengajuan: "Ditolak",
+        sellerSudahSetuju: true,
+        buyerSudahKirimResi: true,
+        buyerSudahAjukanKonfirmasi: true,
+        tolakKonfirmasiBuyer: true,
+        dalamPengirimanBalik: true,
+        statusSeller: "setuju",
+        waktuKomplain: "2 Juli 2025, 09:00 WIB",
+        waktuSellerSetuju: "2 Juli 2025, 10:00 WIB",
+        waktuBuyerKirimResi: "3 Juli 2025, 09:00 WIB",
+        waktuBuyerAjukanKonfirmasi: "3 Juli 2025, 15:00 WIB",
+        waktuTolakKonfirmasiBuyer: "4 Juli 2025, 11:00 WIB",
     },
 ];
 
+// Helper untuk generate field stepper default berdasarkan status dan statusPengajuan
+function generateStepperFields(item) {
+    const base = {
+        sellerSudahSetuju: false,
+        sellerSudahTolak: false,
+        adminSudahSetuju: false,
+        adminSudahTolak: false,
+        buyerSudahKirimResi: false,
+        buyerMelewatkanBatasWaktu: false,
+        dalamPengirimanBalik: false,
+        buyerSudahAjukanKonfirmasi: false,
+        teruskanKonfirmasiBuyer: false,
+        tolakKonfirmasiBuyer: false,
+        transaksiSelesai: false,
+        statusSeller: undefined,
+        statusAdmin: undefined,
+        waktuKomplain: item.waktu,
+        waktuSellerSetuju: undefined,
+        waktuSellerTolak: undefined,
+        waktuAdminSetuju: undefined,
+        waktuAdminTolak: undefined,
+        waktuBuyerKirimResi: undefined,
+        waktuBuyerAjukanKonfirmasi: undefined,
+        waktuTeruskanKonfirmasiBuyer: undefined,
+        waktuTolakKonfirmasiBuyer: undefined,
+        waktuTransaksiSelesai: undefined,
+        waktuDibatalkan: undefined,
+    };
+    switch (item.status) {
+        case "Persetujuan Seller":
+            // Step awal
+            return base;
+        case "Persetujuan Admin":
+            return { ...base, sellerSudahTolak: true, statusSeller: "tolak", waktuSellerTolak: item.waktu };
+        case "Pengembalian Barang":
+            if (item.statusPengajuan === "Menunggu Seller") {
+                return {
+                    ...base,
+                    sellerSudahSetuju: true,
+                    buyerSudahKirimResi: true,
+                    buyerSudahAjukanKonfirmasi: true,
+                    teruskanKonfirmasiBuyer: true,
+                    dalamPengirimanBalik: true,
+                    statusSeller: "setuju",
+                    waktuSellerSetuju: item.waktu,
+                    waktuBuyerKirimResi: item.waktu,
+                    waktuBuyerAjukanKonfirmasi: item.waktu,
+                    waktuTeruskanKonfirmasiBuyer: item.waktu,
+                };
+            } else if (item.statusPengajuan === "Ditolak") {
+                return {
+                    ...base,
+                    sellerSudahSetuju: true,
+                    buyerSudahKirimResi: true,
+                    buyerSudahAjukanKonfirmasi: true,
+                    tolakKonfirmasiBuyer: true,
+                    dalamPengirimanBalik: true,
+                    statusSeller: "setuju",
+                    waktuSellerSetuju: item.waktu,
+                    waktuBuyerKirimResi: item.waktu,
+                    waktuBuyerAjukanKonfirmasi: item.waktu,
+                    waktuTolakKonfirmasiBuyer: item.waktu,
+                };
+            } else if (item.statusPengajuan === "Ditinjau") {
+                return {
+                    ...base,
+                    sellerSudahSetuju: true,
+                    buyerSudahKirimResi: true,
+                    buyerSudahAjukanKonfirmasi: true,
+                    dalamPengirimanBalik: true,
+                    statusSeller: "setuju",
+                    waktuSellerSetuju: item.waktu,
+                    waktuBuyerKirimResi: item.waktu,
+                    waktuBuyerAjukanKonfirmasi: item.waktu,
+                };
+            } else {
+                return {
+                    ...base,
+                    sellerSudahSetuju: true,
+                    statusSeller: "setuju",
+                    waktuSellerSetuju: item.waktu,
+                };
+            }
+        case "Transaksi Selesai":
+            return {
+                ...base,
+                sellerSudahSetuju: true,
+                buyerSudahKirimResi: true,
+                buyerSudahAjukanKonfirmasi: true,
+                teruskanKonfirmasiBuyer: true,
+                transaksiSelesai: true,
+                statusSeller: "setuju",
+                statusAdmin: "setuju",
+                waktuSellerSetuju: item.waktu,
+                waktuBuyerKirimResi: item.waktu,
+                waktuBuyerAjukanKonfirmasi: item.waktu,
+                waktuTeruskanKonfirmasiBuyer: item.waktu,
+                waktuTransaksiSelesai: item.waktu,
+            };
+        case "Dibatalkan":
+        case "Komplain Dibatalkan":
+            return base;
+        default:
+            return base;
+    }
+}
+
+// Terapkan ke seluruh initialData
+const initialDataWithStepper = initialData.map(item => ({
+    ...item,
+    ...generateStepperFields(item),
+}));
+
+export const mapTableStatusToStepStatus = (tableStatus, statusPengajuan) => {
+    switch (tableStatus) {
+        case "Persetujuan Seller":
+            return statusPengajuan === "Menunggu Seller" ? "menungguSeller" : "sellerSetuju";
+        case "Persetujuan Admin":
+            return "menungguAdmin";
+        case "Pengembalian Barang":
+            if (statusPengajuan === "Ditolak") return "tolakKonfirmasiBuyer";
+            if (statusPengajuan === "Ditinjau") return "buyerAjukanKonfirmasi";
+            if (statusPengajuan === "Menunggu Seller") return "teruskanKonfirmasiBuyer";
+            if (statusPengajuan === "Teruskan Konfirmasi") return "teruskanKonfirmasiBuyer";
+            return "dalamPengirimanBalik";
+        case "Pengambilan Barang":
+            if (statusPengajuan === "Ditinjau") return "buyerAjukanKonfirmasi";
+            if (statusPengajuan === "Ditolak") return "tolakKonfirmasiBuyer";
+            if (statusPengajuan === "Menunggu Seller") return "teruskanKonfirmasiBuyer";
+            if (statusPengajuan === "Teruskan Konfirmasi") return "teruskanKonfirmasiBuyer";
+            return "dalamPengirimanBalik";
+        case "Transaksi Selesai":
+            return "transaksiSelesai";
+        case "Dibatalkan":
+            return "komplainDibatalkan";
+        case "Komplain Dibatalkan":
+            return "komplainDibatalkan";
+        case "Seller Setuju":
+            return "sellerSetuju";
+        case "Seller Tolak":
+            return "sellerTolak";
+        default:
+            return "menungguSeller";
+    }
+};
+
 const DataTableBarangGaSesuai = ({ onRowDetail, filterConfig, loading = false }) => {
-    const [data, setData] = useState(initialData);
+    const [data, setData] = useState(initialDataWithStepper);
     const [selectAll, setSelectAll] = useState(false);
     const [checkedItems, setCheckedItems] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
@@ -596,5 +799,35 @@ const DataTableBarangGaSesuai = ({ onRowDetail, filterConfig, loading = false })
         </div>
     );
 };
+
+export function mapDataToStepPropsGaSesuai(data) {
+    return {
+        sellerSudahSetuju: !!data.sellerSudahSetuju,
+        sellerSudahTolak: !!data.sellerSudahTolak,
+        adminSudahSetuju: !!data.adminSudahSetuju,
+        adminSudahTolak: !!data.adminSudahTolak,
+        buyerSudahKirimResi: !!data.buyerSudahKirimResi,
+        buyerMelewatkanBatasWaktu: !!data.buyerMelewatkanBatasWaktu,
+        dalamPengirimanBalik: !!data.dalamPengirimanBalik,
+        buyerSudahAjukanKonfirmasi: !!data.buyerSudahAjukanKonfirmasi,
+        teruskanKonfirmasiBuyer: !!data.teruskanKonfirmasiBuyer,
+        tolakKonfirmasiBuyer: !!data.tolakKonfirmasiBuyer,
+        transaksiSelesai: !!data.transaksiSelesai,
+        waktuKomplain: data.waktuKomplain,
+        waktuSellerSetuju: data.waktuSellerSetuju,
+        waktuSellerTolak: data.waktuSellerTolak,
+        waktuAdminSetuju: data.waktuAdminSetuju,
+        waktuAdminTolak: data.waktuAdminTolak,
+        waktuBuyerKirimResi: data.waktuBuyerKirimResi,
+        waktuBuyerAjukanKonfirmasi: data.waktuBuyerAjukanKonfirmasi,
+        waktuTeruskanKonfirmasiBuyer: data.waktuTeruskanKonfirmasiBuyer,
+        waktuTolakKonfirmasiBuyer: data.waktuTolakKonfirmasiBuyer,
+        waktuTransaksiSelesai: data.waktuTransaksiSelesai,
+        waktuDibatalkan: data.waktuDibatalkan,
+        currentStatus: data.currentStatus,
+        isSellerSetuju: data.statusSeller === 'setuju',
+        isAdminSetuju: data.statusAdmin === 'setuju',
+    };
+}
 
 export default DataTableBarangGaSesuai;
