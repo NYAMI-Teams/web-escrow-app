@@ -22,7 +22,40 @@ const BarangRusakPage = () => {
     const [filteredData, setFilteredData] = useState(null);
 
     const handleDetail = (row) => {
-        navigate(`/barang-rusak/${row.id}`, { state: { data: row } });
+        // Map table status to step status
+        const mapTableStatusToStepStatus = (tableStatus, statusPengajuan) => {
+            const statusMap = {
+                'Persetujuan Seller': 'menungguSeller',
+                'Seller Setuju': 'sellerSetuju',
+                'Seller Tolak': 'sellerTolak',
+                'Persetujuan Admin': 'menungguAdmin',
+                'Admin Setuju': 'adminSetuju',
+                'Admin Tolak': 'adminTolak',
+                'Pengembalian Barang': statusPengajuan === 'Ditolak' ? 'adminTolak' :
+                    statusPengajuan === 'Ditinjau' ? 'buyerAjukanKonfirmasi' :
+                        statusPengajuan === 'Menunggu Seller' ? 'teruskanKonfirmasiBuyer' :
+                            statusPengajuan === 'Teruskan Konfirmasi' ? 'teruskanKonfirmasiBuyer' :
+                                'dalamPengirimanBalik',
+                'Pengambilan Barang': statusPengajuan === 'Ditinjau' ? 'buyerAjukanKonfirmasi' :
+                    statusPengajuan === 'Ditolak' ? 'adminTolak' :
+                        statusPengajuan === 'Menunggu Seller' ? 'buyerAjukanKonfirmasi' :
+                            statusPengajuan === 'Teruskan Konfirmasi' ? 'teruskanKonfirmasiBuyer' :
+                                'dalamPengirimanBalik',
+                'Transaksi Selesai': 'transaksiSelesai',
+                'Komplain Dibatalkan': 'komplainDibatalkan',
+                'Dibatalkan': 'komplainDibatalkan'
+            };
+            return statusMap[tableStatus] || 'menungguSeller';
+        };
+
+        const stepStatus = row.stepStatus || mapTableStatusToStepStatus(row.status, row.statusPengajuan);
+
+        navigate(`/barang-rusak/${row.id}`, {
+            state: {
+                data: row,
+                stepStatus: stepStatus
+            }
+        });
     };
 
     const handleSearchChange = (value) => {
