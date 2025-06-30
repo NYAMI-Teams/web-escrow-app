@@ -30,7 +30,7 @@ const LoginForm = () => {
       const data = await loginUser(email, password);
       localStorage.setItem("accessToken", data.accessToken);
 
-      navigate("/users"); // redirect setelah login
+      navigate("/users"); // redirect setelah login ini
     } catch (error) {
       console.error("Login error:", error);
       alert("Login gagal. Periksa email dan password.");
