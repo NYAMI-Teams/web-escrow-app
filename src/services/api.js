@@ -24,7 +24,7 @@ api.interceptors.response.use(
       localStorage.removeItem("accessToken");
       window.location.href = "/";
     }
-    return Promise.reject(error);
+    return Promise.reject(error?.response?.data ? error?.response?.data : error)
   }
 );
 

@@ -69,6 +69,7 @@ const UserPage = () => {
         selectedDateRange={selectedDateRange}
         onDateChange={setSelectedDateRange}
         onResetFilters={handleResetFilters}
+        loading={loading}
       />
       <UserTable
         users={users}

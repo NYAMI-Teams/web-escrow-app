@@ -32,8 +32,7 @@ const LoginForm = () => {
 
       navigate("/users"); // redirect setelah login ini
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Login gagal. Periksa email dan password.");
+      alert(error?.message || "Login gagal, silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
