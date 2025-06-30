@@ -1,7 +1,7 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useParams } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
-const Breadcrumb = () => {
+const Breadcrumb = ({id}) => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -30,9 +30,9 @@ const Breadcrumb = () => {
 
   // Mapping untuk detail pages
   const detailNameMap = {
-    "barang-hilang": "Detail Barang Hilang",
-    "barang-rusak": "Detail Barang Rusak",
-    "barang-ga-sesuai": "Detail Barang Ga Sesuai",
+    "barang-hilang": "Komplain Barang Hilang",
+    "barang-rusak": "Komplain Barang Rusak",
+    "barang-ga-sesuai": "Komplain Barang Ga Sesuai",
   };
 
   // Cari parent menu dari segment pertama
@@ -61,6 +61,8 @@ const Breadcrumb = () => {
             displayName = "Detail User";
           } else if (firstSegment === "complain") {
             displayName = "Detail Komplain";
+          } else if (id) {
+            displayName = id;
           } else {
             displayName = "Detail";
           }

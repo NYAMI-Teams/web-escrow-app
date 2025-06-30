@@ -9,50 +9,20 @@ import {
     TableRow,
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon, CheckCircle2, XCircle } from "lucide-react";
-
-// Fungsi untuk mapping status tabel ke status step
-const mapTableStatusToStepStatus = (tableStatus, statusPengajuan) => {
-    switch (tableStatus) {
-        case "Persetujuan Seller":
-            return statusPengajuan === "Menunggu Seller" ? "menungguSeller" : "sellerSetuju";
-        case "Persetujuan Admin":
-            return "menungguAdmin";
-        case "Pengembalian Barang":
-            if (statusPengajuan === "Ditolak") return "tolakKonfirmasiBuyer";
-            if (statusPengajuan === "Ditinjau") return "buyerAjukanKonfirmasi";
-            if (statusPengajuan === "Menunggu Seller") return "teruskanKonfirmasiBuyer";
-            if (statusPengajuan === "Teruskan Konfirmasi") return "teruskanKonfirmasiBuyer";
-            return "dalamPengirimanBalik";
-        case "Pengambilan Barang":
-            if (statusPengajuan === "Ditinjau") return "buyerAjukanKonfirmasi";
-            if (statusPengajuan === "Ditolak") return "tolakKonfirmasiBuyer";
-            if (statusPengajuan === "Menunggu Seller") return "teruskanKonfirmasiBuyer";
-            if (statusPengajuan === "Teruskan Konfirmasi") return "teruskanKonfirmasiBuyer";
-            return "dalamPengirimanBalik";
-        case "Transaksi Selesai":
-            return "transaksiSelesai";
-        case "Dibatalkan":
-            return "komplainDibatalkan";
-        case "Komplain Dibatalkan":
-            return "komplainDibatalkan";
-        case "Seller Setuju":
-            return "sellerSetuju";
-        case "Seller Tolak":
-            return "sellerTolak";
-        default:
-            return "menungguSeller";
-    }
-};
+import { getListComplaint } from "../../services/complaint.service";
+import { formatDate} from "../lib/dateFormat";
 
 const STATUS_COLORS = {
-    "Persetujuan Seller": "text-blue-800",
+    "Persetujuan Seller": "text-[#5C5C5C]",
     "Dibatalkan": "text-gray-400",
-    "Komplain Dibatalkan": "text-red-500",
+    "Komplain Ditolak Admin": "text-red-500",
     "Pengembalian Barang": "text-yellow-500",
     "Persetujuan Admin": "text-blue-600",
     "Transaksi Selesai": "text-teal-500",
     "Seller Setuju": "text-green-500",
     "Seller Tolak": "text-red-600",
+    "Barang Sedang Dalam Pengiriman": "text-blue-500",
+    "Menunggu Persetujuan Admin": "text-blue-600",
 };
 
 const PENGAJUAN_STATUS_COLORS = {
@@ -64,12 +34,29 @@ const PENGAJUAN_STATUS_COLORS = {
     "Tolak Konfirmasi": "text-red-600 font-semibold",
 };
 
+//  WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, COMPLETED, UNDER_INVESTIGATION, APPROVED_BY_SELLER, APPROVED_BY_ADMIN, REJECTED_BY_SELLER, REJECTED_BY_ADMIN, CANCELED_BY_BUYER
+const mapStatusComplaint = {
+    
+
+    "waiting_seller_approval": "Persetujuan Seller",
+    "return_in_transit": "Barang Sedang Dalam Pengiriman",
+    "return_requested": "Pengembalian Barang",
+    "approved_by_admin": "Persetujuan Admin",
+    "awaiting_admin_approval": "Menunggu Persetujuan Admin",
+    "awaiting_seller_confirmation": "Menunggu Persetujuan Admin",
+    "completed": "Transaksi Selesai",
+    "canceled_by_buyer": "Dibatalkan",
+    "approved_by_seller": "Seller Setuju",
+    "rejected_by_seller": "Seller Tolak",
+    "rejected_by_admin": "Komplain Ditolak Admin",
+}
+
 const statusOrder = [
     "Persetujuan Seller",
     "Pengembalian Barang",
     "Persetujuan Admin",
     "Transaksi Selesai",
-    "Komplain Dibatalkan",
+    "Komplain Ditolak Admin",
     "Dibatalkan",
     "Seller Setuju",
     "Seller Tolak",
@@ -83,380 +70,23 @@ const asuransiIcon = (val) =>
     );
 
 const columns = [
-    { key: "id", label: "ID Komplain", minWidth: "120px" },
+    { key: "transaction_code", label: "ID Transaksi", minWidth: "120px" },
     { key: "waktu", label: "Waktu Komplain", minWidth: "140px", sortable: true },
     { key: "nama", label: "Nama Barang", minWidth: "180px" },
     { key: "pembeli", label: "Pembeli", minWidth: "180px" },
     { key: "noResi", label: "No Resi", minWidth: "140px" },
     { key: "ekspedisi", label: "Ekspedisi", minWidth: "180px", sortable: true },
-    { key: "status", label: "Status Komplain", minWidth: "160px", filterable: true },
+    { key: "statusMap", label: "Status Komplain", minWidth: "160px", filterable: true },
     { key: "statusPengajuan", label: "Status Pengajuan", minWidth: "160px" },
     { key: "asuransi", label: "Asuransi", minWidth: "80px" },
 ];
 
-const initialData = [
-    {
-        id: "R2345678901",
-        waktu: "17 Juni 2025",
-        nama: "Monitor Gaming",
-        pembeli: "user1@example.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Persetujuan Seller",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "17 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678902",
-        waktu: "18 Juni 2025",
-        nama: "Keyboard Mechanical",
-        pembeli: "user2@example.com",
-        noResi: "JX3474124014",
-        ekspedisi: "JNE Indonesia",
-        status: "Dibatalkan",
-        asuransi: false,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "18 Juni 2025, 09:00 WIB",
-        waktuDibatalkan: "19 Juni 2025, 14:00 WIB"
-    },
-    {
-        id: "R2345678903",
-        waktu: "16 Juni 2025",
-        nama: "Mouse Logitech",
-        pembeli: "user3@example.com",
-        noResi: "JX3474124015",
-        ekspedisi: "SiCepat Express",
-        status: "Pengembalian Barang",
-        asuransi: false,
-        statusPengajuan: "Ditinjau",
-        waktuKomplain: "16 Juni 2025, 11:00 WIB"
-    },
-    {
-        id: "R2345678904",
-        waktu: "20 Juni 2025",
-        nama: "Webcam HD",
-        pembeli: "user4@example.com",
-        noResi: "JX3474124016",
-        ekspedisi: "Pos Indonesia",
-        status: "Persetujuan Admin",
-        asuransi: false,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "20 Juni 2025, 08:30 WIB"
-    },
-    {
-        id: "R2345678905",
-        waktu: "21 Juni 2025",
-        nama: "Headset Gaming",
-        pembeli: "user5@example.com",
-        noResi: "JX3474124017",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Transaksi Selesai",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "21 Juni 2025, 14:00 WIB"
-    },
-    {
-        id: "R2345678906",
-        waktu: "22 Juni 2025",
-        nama: "Kabel HDMI",
-        pembeli: "user6@example.com",
-        noResi: "JX3474124018",
-        ekspedisi: "JNE Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Ditolak",
-        waktuKomplain: "22 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678907",
-        waktu: "23 Juni 2025",
-        nama: "Meja Komputer",
-        pembeli: "user7@example.com",
-        noResi: "JX3474124019",
-        ekspedisi: "SiCepat Express",
-        status: "Pengembalian Barang",
-        asuransi: false,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "23 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678908",
-        waktu: "24 Juni 2025",
-        nama: "Kursi Gaming",
-        pembeli: "user8@example.com",
-        noResi: "JX3474124020",
-        ekspedisi: "GoSend",
-        status: "Persetujuan Seller",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "24 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678909",
-        waktu: "25 Juni 2025",
-        nama: "Mic Kondenser",
-        pembeli: "user9@example.com",
-        noResi: "JX3474124021",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Menunggu Seller",
-        waktuKomplain: "25 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678910",
-        waktu: "26 Juni 2025",
-        nama: "Lampu LED RGB",
-        pembeli: "user10@example.com",
-        noResi: "JX3474124022",
-        ekspedisi: "Anteraja",
-        status: "Pengembalian Barang",
-        asuransi: false,
-        statusPengajuan: "Ditinjau",
-        waktuKomplain: "26 Juni 2025, 15:00 WIB"
-    },
-    {
-        id: "R2345678911",
-        waktu: "27 Juni 2025",
-        nama: "Speaker Bluetooth",
-        pembeli: "user11@example.com",
-        noResi: "JX3474124023",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "27 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678912",
-        waktu: "28 Juni 2025",
-        nama: "Laptop Gaming",
-        pembeli: "user12@example.com",
-        noResi: "JX3474124024",
-        ekspedisi: "JNE Indonesia",
-        status: "Dibatalkan",
-        asuransi: false,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "28 Juni 2025, 10:00 WIB",
-        waktuDibatalkan: "29 Juni 2025, 15:00 WIB"
-    },
-    {
-        id: "R2345678913",
-        waktu: "29 Juni 2025",
-        nama: "Smartphone",
-        pembeli: "user13@example.com",
-        noResi: "JX3474124025",
-        ekspedisi: "SiCepat Express",
-        status: "Dibatalkan",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "29 Juni 2025, 09:30 WIB",
-        waktuDibatalkan: "30 Juni 2025, 11:00 WIB"
-    },
-    {
-        id: "R2345678914",
-        waktu: "29 Juni 2025",
-        nama: "Printer Epson",
-        pembeli: "user16@example.com",
-        noResi: "JX3474124023",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "29 Juni 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678915",
-        waktu: "30 Juni 2025",
-        nama: "Scanner Canon",
-        pembeli: "user17@example.com",
-        noResi: "JX3474124024",
-        ekspedisi: "JNE Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: false,
-        statusPengajuan: "Ditinjau",
-        waktuKomplain: "30 Juni 2025, 12:00 WIB"
-    },
-    {
-        id: "R2345678916",
-        waktu: "1 Juli 2025",
-        nama: "Speaker Bluetooth",
-        pembeli: "user18@example.com",
-        noResi: "JX3474124025",
-        ekspedisi: "SiCepat Express",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Menunggu Seller",
-        waktuKomplain: "1 Juli 2025, 10:00 WIB"
-    },
-    {
-        id: "R2345678917",
-        waktu: "2 Juli 2025",
-        nama: "Tablet Samsung",
-        pembeli: "user19@example.com",
-        noResi: "JX3474124026",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: false,
-        statusPengajuan: "Ditinjau",
-        waktuKomplain: "2 Juli 2025, 13:00 WIB"
-    },
-    {
-        id: "R2345678918",
-        waktu: "3 Juli 2025",
-        nama: "Smartwatch",
-        pembeli: "user20@example.com",
-        noResi: "JX3474124027",
-        ekspedisi: "JNE Indonesia",
-        status: "Persetujuan Admin",
-        asuransi: true,
-        statusPengajuan: "Tanpa pengajuan",
-        waktuKomplain: "3 Juli 2025, 09:00 WIB"
-    },
-    {
-        id: "R2345678919",
-        waktu: "4 Juli 2025",
-        nama: "SSD NVMe 1TB",
-        pembeli: "user21@example.com",
-        noResi: "JX3474124028",
-        ekspedisi: "SiCepat Express",
-        status: "Seller Tolak",
-        asuransi: false,
-        statusPengajuan: null,
-    },
-    {
-        id: "R2345678920",
-        waktu: "5 Juli 2025",
-        nama: "Monitor LG",
-        pembeli: "user22@example.com",
-        noResi: "JX3474124029",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Pengembalian Barang",
-        asuransi: true,
-        statusPengajuan: "Menunggu Seller",
-        waktuKomplain: "5 Juli 2025, 10:00 WIB"
-    }
-];
-
-// Helper untuk generate field stepper default berdasarkan status dan statusPengajuan
-function generateStepperFields(item) {
-    const base = {
-        sellerSudahSetuju: false,
-        sellerSudahTolak: false,
-        adminSudahSetuju: false,
-        adminSudahTolak: false,
-        buyerSudahKirimResi: false,
-        buyerMelewatkanBatasWaktu: false,
-        dalamPengirimanBalik: false,
-        buyerSudahAjukanKonfirmasi: false,
-        teruskanKonfirmasiBuyer: false,
-        tolakKonfirmasiBuyer: false,
-        transaksiSelesai: false,
-        statusSeller: undefined,
-        statusAdmin: undefined,
-        waktuKomplain: item.waktuKomplain || item.waktu,
-        waktuSellerSetuju: undefined,
-        waktuSellerTolak: undefined,
-        waktuAdminSetuju: undefined,
-        waktuAdminTolak: undefined,
-        waktuBuyerKirimResi: undefined,
-        waktuBuyerAjukanKonfirmasi: undefined,
-        waktuTeruskanKonfirmasiBuyer: undefined,
-        waktuTolakKonfirmasiBuyer: undefined,
-        waktuTransaksiSelesai: undefined,
-        waktuDibatalkan: item.waktuDibatalkan,
-    };
-    switch (item.status) {
-        case "Persetujuan Seller":
-            return base;
-        case "Persetujuan Admin":
-            return { ...base, sellerSudahTolak: true, statusSeller: "tolak", waktuSellerTolak: item.waktu };
-        case "Pengembalian Barang":
-            if (item.statusPengajuan === "Menunggu Seller") {
-                return {
-                    ...base,
-                    sellerSudahSetuju: true,
-                    buyerSudahKirimResi: true,
-                    buyerSudahAjukanKonfirmasi: true,
-                    teruskanKonfirmasiBuyer: true,
-                    dalamPengirimanBalik: true,
-                    statusSeller: "setuju",
-                    waktuSellerSetuju: item.waktu,
-                    waktuBuyerKirimResi: item.waktu,
-                    waktuBuyerAjukanKonfirmasi: item.waktu,
-                    waktuTeruskanKonfirmasiBuyer: item.waktu,
-                };
-            } else if (item.statusPengajuan === "Ditolak") {
-                return {
-                    ...base,
-                    sellerSudahSetuju: true,
-                    buyerSudahKirimResi: true,
-                    buyerSudahAjukanKonfirmasi: true,
-                    tolakKonfirmasiBuyer: true,
-                    dalamPengirimanBalik: true,
-                    statusSeller: "setuju",
-                    waktuSellerSetuju: item.waktu,
-                    waktuBuyerKirimResi: item.waktu,
-                    waktuBuyerAjukanKonfirmasi: item.waktu,
-                    waktuTolakKonfirmasiBuyer: item.waktu,
-                };
-            } else if (item.statusPengajuan === "Ditinjau") {
-                return {
-                    ...base,
-                    sellerSudahSetuju: true,
-                    buyerSudahKirimResi: true,
-                    buyerSudahAjukanKonfirmasi: true,
-                    dalamPengirimanBalik: true,
-                    statusSeller: "setuju",
-                    waktuSellerSetuju: item.waktu,
-                    waktuBuyerKirimResi: item.waktu,
-                    waktuBuyerAjukanKonfirmasi: item.waktu,
-                };
-            } else {
-                return {
-                    ...base,
-                    sellerSudahSetuju: true,
-                    statusSeller: "setuju",
-                    waktuSellerSetuju: item.waktu,
-                };
-            }
-        case "Transaksi Selesai":
-            return {
-                ...base,
-                sellerSudahSetuju: true,
-                buyerSudahKirimResi: true,
-                buyerSudahAjukanKonfirmasi: true,
-                teruskanKonfirmasiBuyer: true,
-                transaksiSelesai: true,
-                statusSeller: "setuju",
-                statusAdmin: "setuju",
-                waktuSellerSetuju: item.waktu,
-                waktuBuyerKirimResi: item.waktu,
-                waktuBuyerAjukanKonfirmasi: item.waktu,
-                waktuTeruskanKonfirmasiBuyer: item.waktu,
-                waktuTransaksiSelesai: item.waktu,
-            };
-        case "Dibatalkan":
-        case "Komplain Dibatalkan":
-            return base;
-        default:
-            return base;
-    }
-}
-
-// Terapkan ke seluruh initialData
-const initialDataWithStepper = initialData.map(item => ({
-    ...item,
-    ...generateStepperFields(item),
-}));
-
 const DataTableBarangRusak = ({ onRowDetail, filterConfig, loading = false }) => {
-    const [data, setData] = useState(initialDataWithStepper);
+    const [data, setData] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const [checkedItems, setCheckedItems] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
     const parseDate = (str) => {
@@ -558,6 +188,10 @@ const DataTableBarangRusak = ({ onRowDetail, filterConfig, loading = false }) =>
     const currentItems = processedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     useEffect(() => {
+        fetchData();
+    }, [])
+
+    useEffect(() => {
         setCurrentPage(1);
     }, [filterConfig]);
 
@@ -565,6 +199,29 @@ const DataTableBarangRusak = ({ onRowDetail, filterConfig, loading = false }) =>
         const allChecked = currentItems.length > 0 && currentItems.every((item) => checkedItems[item.id]);
         setSelectAll(allChecked);
     }, [checkedItems, currentItems]);
+
+    const fetchData = async () => {
+            try {
+                const res = await getListComplaint({
+                    type: "damaged",
+                });
+                const formattedData = res.map(item => ({
+                    ...item,
+                    transaction_code: item?.transaction?.transaction_code,
+                    waktu: formatDate(item?.created_at),
+                    nama: item?.transaction?.item_name,
+                    pembeli: item?.buyer?.email,
+                    noResi: item?.transaction?.shipment?.tracking_number || "-",
+                    ekspedisi: item?.transaction?.shipment?.courier?.name || "-",
+                    statusMap: mapStatusComplaint[item?.status] || item?.status,
+                    asuransi: item?.transaction?.insurance_fee > 0,
+                    statusPengajuan: "Belummm",
+                }));
+                setData(formattedData || []);
+            } catch (error) {
+                alert(error.message || "Terjadi kesalahan saat mengambil data komplain");
+            }
+        }
 
     const handleHeaderCheckboxChange = (checked) => {
         const newCheckedItems = {};
@@ -775,8 +432,8 @@ const DataTableBarangRusak = ({ onRowDetail, filterConfig, loading = false }) =>
                                             key={col.key}
                                             className={`px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c] ${col.key === "status" || col.key === "statusPengajuan" ? "text-sm" : ""} ${col.key === "asuransi" ? "text-center" : ""}`}
                                         >
-                                            {col.key === "status" ? (
-                                                <span className={`font-semibold ${getStatusClass(item.status)}`}>{item.status}</span>
+                                            {col.key === "statusMap" ? (
+                                                <span className={`font-semibold ${getStatusClass(item.statusMap)}`}>{item.statusMap}</span>
                                             ) : col.key === "statusPengajuan" ? (
                                                 <span className={`font-semibold ${getPengajuanStatusClass(item.statusPengajuan)}`}>
                                                     {item.statusPengajuan || "Tanpa pengajuan"}

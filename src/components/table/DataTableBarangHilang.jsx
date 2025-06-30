@@ -9,6 +9,8 @@ import {
     TableRow,
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon, CheckCircle2, XCircle } from "lucide-react";
+import { getListComplaint } from "../../services/complaint.service";
+import { formatDateTime } from "../lib/dateFormat";
 
 const STATUS_COLORS = {
     "Dalam Investigasi": "text-blue-500",
@@ -24,6 +26,17 @@ const statusOrder = [
     "Komplain Ditolak",
 ];
 
+ //  WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, COMPLETED, UNDER_INVESTIGATION, APPROVED_BY_SELLER, APPROVED_BY_ADMIN, REJECTED_BY_SELLER, REJECTED_BY_ADMIN, CANCELED_BY_BUYER
+const mapStatusComplaint = {
+    "completed": "Transaksi Selesai",
+    "canceled_by_buyer": "Dibatalkan",
+    "under_investigation": "Dalam Investigasi",
+    "rejected_by_seller": "Komplain Ditolak",
+    "rejected_by_admin": "Komplain Ditolak",
+    "approved_by_seller": "Transaksi Selesai",
+    "approved_by_admin": "Transaksi Selesai",
+}
+
 const asuransiIcon = (val) =>
     val ? (
         <CheckCircle2 className="text-blue-500 w-5 h-5" />
@@ -33,128 +46,176 @@ const asuransiIcon = (val) =>
 
 // Columns definition for easier mapping and BE integration
 const columns = [
-    { key: "id", label: "ID Komplain", minWidth: "120px" },
+    { key: "transaction_code", label: "ID Transaksi", minWidth: "120px" },
     { key: "waktu", label: "Waktu Komplain", minWidth: "140px", sortable: true },
     { key: "nama", label: "Nama Barang", minWidth: "180px" },
     { key: "pembeli", label: "Pembeli", minWidth: "180px" },
     { key: "noResi", label: "No Resi", minWidth: "140px" },
     { key: "ekspedisi", label: "Ekspedisi", minWidth: "180px", sortable: true },
-    { key: "status", label: "Status Komplain", minWidth: "160px", filterable: true },
+    { key: "statusMap", label: "Status Komplain", minWidth: "160px", filterable: true },
     { key: "asuransi", label: "Asuransi", minWidth: "80px" },
 ];
 
 // Mock data (can be replaced with BE data)
-const initialData = [
-    {
-        id: "12345678901",
-        waktu: "17 Juni 2025",
-        nama: "Laptop Acer 2018...",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Dalam Investigasi",
-        asuransi: true,
-    },
-    {
-        id: "12345678902",
-        waktu: "18 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "JNE Indonesia",
-        status: "Dibatalkan",
-        asuransi: false,
-    },
-    {
-        id: "12345678903",
-        waktu: "16 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "SiCepat Express",
-        status: "Transaksi Selesai",
-        asuransi: false,
-    },
-    {
-        id: "12345678904",
-        waktu: "20 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "Pos Indonesia",
-        status: "Transaksi Selesai",
-        asuransi: false,
-    },
-    {
-        id: "12345678905",
-        waktu: "21 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Transaksi Selesai",
-        asuransi: true,
-    },
-    {
-        id: "12345678906",
-        waktu: "22 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Transaksi Selesai",
-        asuransi: true,
-    },
-    {
-        id: "12345678907",
-        waktu: "16 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Dalam Investigasi",
-        asuransi: true,
-    },
-    {
-        id: "12345678908",
-        waktu: "16 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Komplain Ditolak",
-        asuransi: true,
-    },
-    {
-        id: "12345678909",
-        waktu: "16 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Komplain Ditolak",
-        asuransi: false,
-    },
-    {
-        id: "12345678910",
-        waktu: "16 Juni 2025",
-        nama: "IPhone 13 Pro Max",
-        pembeli: "bayuseptyan43@gmail.com",
-        noResi: "JX3474124013",
-        ekspedisi: "J&T Express Indonesia",
-        status: "Komplain Ditolak",
-        asuransi: true,
-    },
-];
+// const initialData = [
+//     {
+//         id: "12345678901",
+//         waktu: "17 Juni 2025",
+//         nama: "Laptop Acer 2018...",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Dalam Investigasi",
+//         asuransi: true,
+//     },
+//     {
+//         id: "12345678902",
+//         waktu: "18 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "JNE Indonesia",
+//         status: "Dibatalkan",
+//         asuransi: false,
+//     },
+//     {
+//         id: "12345678903",
+//         waktu: "16 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "SiCepat Express",
+//         status: "Transaksi Selesai",
+//         asuransi: false,
+//     },
+//     {
+//         id: "12345678904",
+//         waktu: "20 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "Pos Indonesia",
+//         status: "Transaksi Selesai",
+//         asuransi: false,
+//     },
+//     {
+//         id: "12345678905",
+//         waktu: "21 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Transaksi Selesai",
+//         asuransi: true,
+//     },
+//     {
+//         id: "12345678906",
+//         waktu: "22 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Transaksi Selesai",
+//         asuransi: true,
+//     },
+//     {
+//         id: "12345678907",
+//         waktu: "16 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Dalam Investigasi",
+//         asuransi: true,
+//     },
+//     {
+//         id: "12345678908",
+//         waktu: "16 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Komplain Ditolak",
+//         asuransi: true,
+//     },
+//     {
+//         id: "12345678909",
+//         waktu: "16 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Komplain Ditolak",
+//         asuransi: false,
+//     },
+//     {
+//         id: "12345678910",
+//         waktu: "16 Juni 2025",
+//         nama: "IPhone 13 Pro Max",
+//         pembeli: "bayuseptyan43@gmail.com",
+//         noResi: "JX3474124013",
+//         ekspedisi: "J&T Express Indonesia",
+//         status: "Komplain Ditolak",
+//         asuransi: true,
+//     },
+// ];
 
 const DataTableBarangHilang = ({ onRowDetail, filterConfig, loading = false }) => {
-    const [data, setData] = useState(initialData);
+    const [data, setData] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const [checkedItems, setCheckedItems] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     // sortConfig: { key, direction } | null
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+    useEffect(() => {
+        fetchData();
+    }, [])
+
+    const fetchData = async () => {
+        try {
+            const res = await getListComplaint({
+                type: "lost",
+            });
+            /* 
+            {
+            "id": "1e6bd525-255e-48a8-884d-c26cb418aeac",
+            "type": "lost",
+            "status": "completed",
+            "created_at": "2025-06-25T02:15:06.925Z",
+            "buyer": {
+                "email": "bayuseptyan43@gmail.com"
+            },
+            "transaction": {
+                "status": "completed",
+                "transaction_code": "TRX-882725-1317",
+                "item_name": "Dispute 3 (Jangan DIhapus)",
+                "insurance_fee": 4000,
+                "shipment": {
+                    "tracking_number": "AJA4321",
+                    "courier": {
+                        "name": "AnterAja"
+                    }
+                }
+            }} 
+            */
+            const formattedData = res.map(item => ({
+                ...item,
+                transaction_code: item?.transaction?.transaction_code,
+                waktu: formatDateTime(item?.created_at),
+                nama: item?.transaction?.item_name,
+                pembeli: item?.buyer?.email,
+                noResi: item?.transaction?.shipment?.tracking_number || "-",
+                ekspedisi: item?.transaction?.shipment?.courier?.name || "-",
+                statusMap: mapStatusComplaint[item?.status] || item?.status,
+                asuransi: item?.transaction?.insurance_fee > 0,
+            }));
+            setData(formattedData || []);
+        } catch (error) {
+            alert(error.message || "Terjadi kesalahan saat mengambil data komplain");
+        }
+    }
 
     // Helper function to parse date string
     const parseDate = (str) => {
@@ -302,15 +363,6 @@ const DataTableBarangHilang = ({ onRowDetail, filterConfig, loading = false }) =
         } else if (sortConfig.direction === "ascending") {
             setSortConfig({ key: "status", direction: "descending" });
         } else if (sortConfig.direction === "descending") {
-            setSortConfig({ key: null, direction: null });
-        }
-        setCurrentPage(1);
-    };
-
-    const handleCategoryFilter = (key) => {
-        if (sortConfig && sortConfig.key === key) {
-            setSortConfig({ key: null, direction: null });
-        } else {
             setSortConfig({ key: null, direction: null });
         }
         setCurrentPage(1);
@@ -468,8 +520,8 @@ const DataTableBarangHilang = ({ onRowDetail, filterConfig, loading = false }) =
                                             key={col.key}
                                             className={`px-2 py-0 border-r border-[#c9c9c9] text-[0.8rem] sm:text-sm text-[#5c5c5c] ${col.key === "status" ? "text-sm" : ""} ${col.key === "asuransi" ? "text-center" : ""}`}
                                         >
-                                            {col.key === "status" ? (
-                                                <span className={`font-semibold ${getStatusClass(item.status)}`}>{item.status}</span>
+                                            {col.key === "statusMap" ? (
+                                                <span className={`font-semibold ${getStatusClass(item.statusMap)}`}>{item.statusMap}</span>
                                             ) : col.key === "asuransi" ? (
                                                 asuransiIcon(item.asuransi)
                                             ) : (

@@ -89,11 +89,11 @@ const Sidebar = () => {
             <Shuffle className="w-4 h-4 stroke-current" />,
             "Barang Rusak"
           )}
-          {renderNavItem(
+          {/* {renderNavItem(
             "/barang-ga-sesuai",
             <Shuffle className="w-4 h-4 stroke-current" />,
             "Barang Ga Sesuai"
-          )}
+          )} */}
           
         </nav>
       </div>

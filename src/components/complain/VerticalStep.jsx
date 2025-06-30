@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Check, Info, XCircle, Ban } from "lucide-react";
 import StepBuatKomplain from './steps/StepBuatKomplain';
 import StepMenungguSeller, { StepMenungguSellerWaiting } from './steps/StepMenungguSeller';
@@ -14,6 +14,7 @@ import StepTolakKonfirmasiBuyer from './steps/StepTolakKonfirmasiBuyer';
 import StepTransaksiSelesai from './steps/StepTransaksiSelesai';
 import StepKomplainDibatalkan from './steps/StepKomplainDibatalkan';
 import StepMenungguAdmin from './steps/StepMenungguAdmin';
+import { formatDateTime } from "../lib/dateFormat";
 
 // Sub-komponen untuk setiap langkah (step) individual
 const StepItem = ({ status, label, timestamp, isLast = false, isCurrentBlue = false }) => {
@@ -143,14 +144,11 @@ const VerticalStepHilang = ({ status, onTolak, onSetuju }) => {
     );
 };
 
-
-// Komponen untuk Komplain 'Barang Rusak' atau 'Tidak Sesuai'
-const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, onSetuju, adminActionTimestamp, isRejectedByAdmin, statusPengajuan, resiPengembalian, buyerReturnTimestamp, buyerConfirmationTimestamp, waktuKomplain, waktuSellerSetuju, waktuSellerTolak, waktuAdminSetuju, waktuAdminTolak, waktuBuyerKirimResi, waktuBuyerAjukanKonfirmasi, waktuTeruskanKonfirmasiBuyer, waktuTolakKonfirmasiBuyer, waktuTransaksiSelesai, waktuDibatalkan, sellerSudahSetuju, sellerSudahTolak, adminSudahSetuju, adminSudahTolak, buyerSudahKirimResi, buyerMelewatkanBatasWaktu, dalamPengirimanBalik, buyerSudahAjukanKonfirmasi, teruskanKonfirmasiBuyer, tolakKonfirmasiBuyer, transaksiSelesai, isSellerSetuju, isAdminSetuju }) => {
-
+const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, onSetuju, adminActionTimestamp, isRejectedByAdmin, statusPengajuan, resiPengembalian, buyerReturnTimestamp, buyerConfirmationTimestamp, waktuKomplain, waktuSellerSetuju, waktuSellerTolak, waktuAdminSetuju, waktuAdminTolak, waktuBuyerKirimResi, waktuBuyerAjukanKonfirmasi, waktuTeruskanKonfirmasiBuyer, waktuTolakKonfirmasiBuyer, waktuTransaksiSelesai, waktuDibatalkan, sellerSudahSetuju, sellerSudahTolak, adminSudahSetuju, adminSudahTolak, buyerSudahKirimResi, buyerMelewatkanBatasWaktu, dalamPengirimanBalik, buyerSudahAjukanKonfirmasi, teruskanKonfirmasiBuyer, tolakKonfirmasiBuyer, transaksiSelesai, isSellerSetuju, isAdminSetuju, data }) => {
     // Fungsi untuk mendapatkan status badge berdasarkan kondisi
     const getStatusBadge = () => {
         // Handle new states first
-        if (currentStatus === 'menungguSeller') {
+        if (data?.status === 'waiting_seller_approval') {
             return {
                 text: "Menunggu Persetujuan Seller",
                 bg: "#FEF3C7",
@@ -158,7 +156,7 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 icon: Info
             };
         }
-        if (currentStatus === 'komplainDibatalkan') {
+        if (data?.status === 'rejected_by_seller' ||data?.status === "canceled_by_buyer") {
             return {
                 text: "Komplain Dibatalkan",
                 bg: "#FDE8EF",
@@ -166,15 +164,8 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 icon: XCircle
             };
         }
-        if (currentStatus === 'buyerAjukanKonfirmasi') {
-            return {
-                text: "Menunggu Konfirmasi",
-                bg: "#FEF3C7",
-                color: "#92400E",
-                icon: Info
-            };
-        }
-        if (currentStatus === 'menungguAdmin') {
+
+        if (data?.status === 'awaiting_admin_approval' || data?.status === 'awaiting_admin_confirmation') {
             return {
                 text: "Menunggu Persetujuan Admin",
                 bg: "#FEF3C7",
@@ -183,7 +174,7 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
             };
         }
 
-        if (transaksiSelesai) {
+        if (data?.status === 'completed') {
             return {
                 text: "Transaksi Selesai",
                 bg: "#D1FAE5",
@@ -191,6 +182,54 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 icon: Check
             };
         }
+
+        if (data?.status === "return_requested") {
+            return {
+                text: "Menunggu Pengembalian Buyer",
+                bg: "#FEF3C7",
+                color: "#92400E",
+                icon: Info
+            };
+        }
+
+        if (data?.status === "return_in_transit") {
+            return {
+                text: "Dalam Pengiriman Balik",
+                bg: "#FEF3C7",
+                color: "#92400E",
+                icon: Info
+            };
+        }
+
+        if (data?.status === "awaiting_seller_confirmation") { //teruskanKonfirmasiBuyer || buyerSudahAjukanKonfirmasi
+            return {
+                text: (data?.status === "awaiting_seller_confirmation") ? "Menunggu Konfirmasi Seller Barang Diterima" : "Menunggu Konfirmasi",
+                bg: "#FEF3C7",
+                color: "#92400E",
+                icon: Info
+            };
+        }
+        
+        if ( data?.status === "rejected_by_admin" || adminSudahTolak) {
+            return {
+                text: "Komplain Ditolak Admin",
+                bg: "#FDE8EF",
+                color: "#C30052",
+                icon: Info
+            };
+        }
+
+        // ========================================= belum clear
+
+        if (data?.status === 'buyerAjukanKonfirmasi') {
+            return {
+                text: "Menunggu Konfirmasi",
+                bg: "#FEF3C7",
+                color: "#92400E",
+                icon: Info
+            };
+        }
+
         if (buyerMelewatkanBatasWaktu) {
             return {
                 text: "Buyer Melewatkan Batas Waktu",
@@ -207,38 +246,7 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 icon: Info
             };
         }
-        if (buyerSudahAjukanKonfirmasi || teruskanKonfirmasiBuyer) {
-            return {
-                text: teruskanKonfirmasiBuyer ? "Menunggu Konfirmasi Seller Barang Diterima" : "Menunggu Konfirmasi",
-                bg: "#FEF3C7",
-                color: "#92400E",
-                icon: Info
-            };
-        }
-        if (dalamPengirimanBalik) {
-            return {
-                text: "Dalam Pengiriman Balik",
-                bg: "#FEF3C7",
-                color: "#92400E",
-                icon: Info
-            };
-        }
-        if (adminSudahTolak) {
-            return {
-                text: "Komplain Ditolak Admin",
-                bg: "#FDE8EF",
-                color: "#C30052",
-                icon: Info
-            };
-        }
-        if (adminSudahSetuju) {
-            return {
-                text: "Menunggu Pengembalian Buyer",
-                bg: "#FEF3C7",
-                color: "#92400E",
-                icon: Info
-            };
-        }
+
         if (sellerSudahSetuju) {
             return {
                 text: "Menunggu Pengembalian Buyer",
@@ -248,9 +256,11 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
             };
         }
 
+        // ========================================== belum clear
+
         // Default status
         return {
-            text: "Menunggu Persetujuan Seller",
+            text: "Loading",
             bg: "#FEF3C7",
             color: "#92400E",
             icon: Info
@@ -259,27 +269,104 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
 
     // Fungsi untuk mendapatkan steps berdasarkan kondisi
     const getSteps = () => {
-        // Handle new states first
-        if (currentStatus === 'menungguSeller') {
-            return <StepBuatKomplain waktuKomplain={waktuKomplain} />;
+
+
+        if (data?.status === 'waiting_seller_approval') {
+            return <StepBuatKomplain waktuKomplain={formatDateTime(data?.created_at)} />;
         }
-        if (currentStatus === 'komplainDibatalkan') {
+
+        if (data?.status === 'canceled_by_buyer') {
             return <StepKomplainDibatalkan
-                waktuKomplain={waktuKomplain}
-                waktuDibatalkan={waktuDibatalkan || "17 Juni 2025, 14:00 WIB"}
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuDibatalkan={formatDateTime(data?.resolved_at)}
             />;
         }
-        if (currentStatus === 'buyerAjukanKonfirmasi') {
+
+        if (data?.status === "awaiting_admin_approval") {
+            return <StepSellerTolak
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerTolak={formatDateTime(data?.seller_responded_at)}
+            />;
+        }
+
+        if (data?.status === "return_requested") {
+            if (data?.seller_decision === 'approved') {
+                return <StepSellerSetuju
+                    waktuKomplain={waktuKomplain}
+                    waktuSellerSetuju={waktuSellerSetuju}
+                />;
+            }
+            return <StepAdminSetuju
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerTolak={formatDateTime(data?.seller_responded_at)}
+                waktuAdminSetuju={formatDateTime(data?.admin_responded_at)}
+            />;
+        }
+
+        if (data?.status === "return_in_transit") {
+            return <StepDalamPengirimanBalik
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerSetuju={formatDateTime(data?.seller_responded_at)}
+                waktuAdminSetuju={formatDateTime(data?.admin_responded_at)}
+                waktuBuyerKirimResi={formatDateTime(data?.return_shipment?.created_at)}
+                isSellerSetuju={data?.seller_decision === 'approved'}
+                isAdminSetuju={data?.admin_decision === 'approved'}
+            />;
+
+        }
+
+        if (data?.status === "awaiting_admin_confirmation") { //currentStatus === 'buyerAjukanKonfirmasi'
             return <StepBuyerAjukanKonfirmasi
-                waktuKomplain={waktuKomplain}
-                waktuSellerSetuju={waktuSellerSetuju}
-                waktuAdminSetuju={waktuAdminSetuju}
-                waktuBuyerKirimResi={waktuBuyerKirimResi}
-                waktuBuyerAjukanKonfirmasi={waktuBuyerAjukanKonfirmasi}
-                isSellerSetuju={isSellerSetuju}
-                isAdminSetuju={isAdminSetuju}
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerSetuju={formatDateTime(data?.seller_responded_at)}
+                waktuAdminSetuju={formatDateTime(data?.admin_responded_at)}
+                waktuBuyerKirimResi={formatDateTime(data?.return_shipment?.created_at)}
+                waktuBuyerAjukanKonfirmasi={formatDateTime(data?.buyer_requested_confirmation_at)}
+                isSellerSetuju={data?.seller_decision === 'approved'}
+                isAdminSetuju={data?.admin_decision === 'approved'}
             />;
         }
+
+        if (data?.status === "awaiting_seller_confirmation") { //teruskanKonfirmasiBuyer
+            return <StepTeruskanKonfirmasiBuyer
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerSetuju={formatDateTime(data?.seller_responded_at)}
+                waktuAdminSetuju={formatDateTime(data?.admin_responded_at)}
+                waktuBuyerKirimResi={formatDateTime(data?.return_shipment?.created_at)}
+                waktuBuyerAjukanKonfirmasi={formatDateTime(data?.buyer_requested_confirmation_at)}
+                waktuTeruskanKonfirmasiBuyer={formatDateTime(data?.admin_approved_confirmation_at)}
+                isSellerSetuju={data?.seller_decision === 'approved'}
+                isAdminSetuju={data?.admin_decision === 'approved'}
+            />;
+        }
+
+        // Jika menggunakan komponen modular
+        if (data?.status === "completed" || transaksiSelesai) {
+            return <StepTransaksiSelesai
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerSetuju={formatDateTime(data?.seller_responded_at)}
+                waktuAdminSetuju={formatDateTime(data?.admin_responded_at)}
+                waktuBuyerKirimResi={formatDateTime(data?.return_shipment?.created_at)}
+                waktuBuyerAjukanKonfirmasi={formatDateTime(data?.buyer_requested_confirmation_at)}
+                waktuTeruskanKonfirmasiBuyer={formatDateTime(data?.admin_approved_confirmation_at)}
+                waktuTolakKonfirmasiBuyer={formatDateTime(data?.admin_rejected_confirmation_at)}
+                waktuTransaksiSelesai={formatDateTime(data?.resolved_at)}
+                isSellerSetuju={data?.seller_decision === 'approved'}
+                isAdminSetuju={data?.admin_decision === 'approved'}
+            />;
+        }
+
+        if (data?.status == "rejected_by_admin" || adminSudahTolak) {
+            return <StepAdminTolak
+                waktuKomplain={formatDateTime(data?.created_at)}
+                waktuSellerTolak={formatDateTime(data?.seller_responded_at)}
+                waktuAdminTolak={formatDateTime(data?.admin_responded_at)}
+            />;
+        }
+
+        // ========================================= belum clear
+
+
         if (currentStatus === 'menungguAdmin') {
             return <StepMenungguAdmin
                 waktuKomplain={waktuKomplain}
@@ -287,21 +374,7 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
             />;
         }
 
-        // Jika menggunakan komponen modular
-        if (transaksiSelesai) {
-            return <StepTransaksiSelesai
-                waktuKomplain={waktuKomplain}
-                waktuSellerSetuju={waktuSellerSetuju}
-                waktuAdminSetuju={waktuAdminSetuju}
-                waktuBuyerKirimResi={waktuBuyerKirimResi}
-                waktuBuyerAjukanKonfirmasi={waktuBuyerAjukanKonfirmasi}
-                waktuTeruskanKonfirmasiBuyer={waktuTeruskanKonfirmasiBuyer}
-                waktuTolakKonfirmasiBuyer={waktuTolakKonfirmasiBuyer}
-                waktuTransaksiSelesai={waktuTransaksiSelesai}
-                isSellerSetuju={isSellerSetuju}
-                isAdminSetuju={isAdminSetuju}
-            />;
-        }
+
         if (buyerMelewatkanBatasWaktu) {
             return <StepBuyerMelewatkanBatasWaktu
                 waktuKomplain={waktuKomplain}
@@ -324,18 +397,7 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 isAdminSetuju={isAdminSetuju}
             />;
         }
-        if (teruskanKonfirmasiBuyer) {
-            return <StepTeruskanKonfirmasiBuyer
-                waktuKomplain={waktuKomplain}
-                waktuSellerSetuju={waktuSellerSetuju}
-                waktuAdminSetuju={waktuAdminSetuju}
-                waktuBuyerKirimResi={waktuBuyerKirimResi}
-                waktuBuyerAjukanKonfirmasi={waktuBuyerAjukanKonfirmasi}
-                waktuTeruskanKonfirmasiBuyer={waktuTeruskanKonfirmasiBuyer}
-                isSellerSetuju={isSellerSetuju}
-                isAdminSetuju={isAdminSetuju}
-            />;
-        }
+
         if (buyerSudahAjukanKonfirmasi) {
             return <StepBuyerAjukanKonfirmasi
                 waktuKomplain={waktuKomplain}
@@ -347,50 +409,17 @@ const VerticalStepRusak = ({ complainType, currentStatus, steps = [], onTolak, o
                 isAdminSetuju={isAdminSetuju}
             />;
         }
-        if (dalamPengirimanBalik) {
-            return <StepDalamPengirimanBalik
-                waktuKomplain={waktuKomplain}
-                waktuSellerSetuju={waktuSellerSetuju}
-                waktuAdminSetuju={waktuAdminSetuju}
-                waktuBuyerKirimResi={waktuBuyerKirimResi}
-                isSellerSetuju={isSellerSetuju}
-                isAdminSetuju={isAdminSetuju}
-            />;
-        }
-        if (adminSudahTolak) {
-            return <StepAdminTolak
-                waktuKomplain={waktuKomplain}
-                waktuSellerTolak={waktuSellerTolak}
-                waktuAdminTolak={waktuAdminTolak}
-            />;
-        }
-        if (adminSudahSetuju) {
-            return <StepAdminSetuju
-                waktuKomplain={waktuKomplain}
-                waktuSellerTolak={waktuSellerTolak}
-                waktuAdminSetuju={waktuAdminSetuju}
-            />;
-        }
-        if (sellerSudahTolak) {
-            return <StepSellerTolak
-                waktuKomplain={waktuKomplain}
-                waktuSellerTolak={waktuSellerTolak}
-            />;
-        }
-        if (sellerSudahSetuju) {
-            return <StepSellerSetuju
-                waktuKomplain={waktuKomplain}
-                waktuSellerSetuju={waktuSellerSetuju}
-            />;
-        }
+
+
+        // ========================================== belum clear
 
         // Fallback: menggunakan StepBuatKomplain
-        return <StepBuatKomplain waktuKomplain={waktuKomplain} />;
+        // return <StepBuatKomplain waktuKomplain={waktuKomplain} />;
     };
 
     // Fungsi untuk mendapatkan action buttons
     const getActionButtons = () => {
-        if (currentStatus === 'menungguAdmin' && onTolak && onSetuju) {
+        if (data?.status === 'awaiting_admin_approval' || data?.status === 'awaiting_admin_confirmation') {
             return (
                 <div className="flex gap-4 mt-8">
                     <button onClick={onTolak} className="flex-1 px-0 py-3 rounded-2xl text-lg font-medium bg-[#FDE8EF] text-[#C30052] hover:bg-[#F9D6E2]">Tolak</button>

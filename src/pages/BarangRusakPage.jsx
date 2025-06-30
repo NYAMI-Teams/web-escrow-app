@@ -88,7 +88,7 @@ const BarangRusakPage = () => {
                     submissionStatus: selectedSubmissionStatus
                 };
 
-                console.log("Applying filters in real-time:", filterConfig);
+                // console.log("Applying filters in real-time:", filterConfig);
                 setFilteredData(filterConfig);
                 setLoading(false);
             }, 300);

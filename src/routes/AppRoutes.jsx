@@ -65,49 +65,61 @@ const AppRoutes = () => {
         <Route
           path='/barang-hilang'
           element={
-            <MainLayout>
-              <BarangHilangPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <BarangHilangPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/barang-hilang/:id'
           element={
-            <MainLayout>
-              <DetailBarangHilangPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DetailBarangHilangPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/barang-rusak'
           element={
-            <MainLayout>
-              <BarangRusakPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <BarangRusakPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/barang-rusak/:id'
           element={
-            <MainLayout>
-              <DetailBarangRusakPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DetailBarangRusakPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/barang-ga-sesuai'
           element={
-            <MainLayout>
-              <BarangGaSesuaiPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <BarangGaSesuaiPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/barang-ga-sesuai/:id'
           element={
-            <MainLayout>
-              <DetailBarangGaSesuaiPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DetailBarangGaSesuaiPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>
