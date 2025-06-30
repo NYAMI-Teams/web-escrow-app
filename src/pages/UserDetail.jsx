@@ -4,7 +4,6 @@ import { PhotoKTPSection } from "../components/UserDetail/PhotoKTPSection";
 import { AccountInfoSection } from "../components/UserDetail/AccountInfoSection";
 import { PersonalDataSection } from "../components/UserDetail/PersonalDataSection";
 import { OtherInfoSection } from "../components/UserDetail/OtherInfoSection";
-import { BreadcrumbUser } from "../components/UserDetail/BreadcrumbUser";
 import Breadcrumb from "../components/BreadCrumb";
 import { getUserById } from "../services/user.service";
 import { useParams } from "react-router-dom";
@@ -20,11 +19,11 @@ export const UserDetail = () => {
       const item = res.data;
 
       setUserInfo({
-        kycStatus : item.kycStatus,
+        kycStatus: item.kycStatus,
         usersId: item.id,
-        email : item.email,
-        createDate : item.createdAt,
-        updateDate : item.updatedAt
+        email: item.email,
+        createDate: item.createdAt,
+        updateDate: item.updatedAt
       });
 
     } catch (error) {
@@ -48,7 +47,7 @@ export const UserDetail = () => {
 
         {/* Right Column */}
         <div className="space-y-6">
-          <AccountInfoSection userInfo={UserInfo}/>
+          <AccountInfoSection userInfo={UserInfo} />
           <PersonalDataSection />
           <OtherInfoSection />
         </div>

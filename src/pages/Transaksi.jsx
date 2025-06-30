@@ -79,6 +79,7 @@ const TransaksiPage = () => {
         selectedDateRange={selectedDateRange}
         onDateChange={setSelectedDateRange}
         onResetFilters={handleResetFilters}
+        loading={loading}
       />
       <TransactionTable
         transactions={transactions}

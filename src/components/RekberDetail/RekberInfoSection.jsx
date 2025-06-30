@@ -197,7 +197,7 @@ const RekberInfoSection = ({
                                 <span className="text-sm font-medium text-gray-900 tracking-widest select-all">{buyer.bank.accountNumber}</span>
                                 <button className="text-xs text-blue-600 hover:underline" onClick={() => handleCopy(buyer.bank.accountNumber)}>Salin</button>
                             </div>
-                        ) : (
+                        ) : (   
                             <div className="flex items-center gap-2">
                                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-medium">{buyer.status}</span>
                             </div>
