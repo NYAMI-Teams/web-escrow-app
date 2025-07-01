@@ -42,70 +42,21 @@ function parseDateFromStep(stepTimestamp) {
   );
 }
 
-// const initialRekberInfo = {
-//   virtualAccount: "808012345678",
-//   transactionId: item.id,
-//   productName: item.itemName,
-//   bill: {
-//     total: "Rp. 8.080.000,00",
-//     product: "Rp. 8.000.000,00",
-//     insurance: "Rp. 16.000,00",
-//     serviceFee: "Rp. 64.000,00",
-//   },
-//   seller: {
-//     email: "irgi168@gmail.com",
-//     userId: "RBK-0000001",
-//     bank: {
-//       name: "BNI",
-//       logo: bniLogo,
-//       accountNumber: "0900604501",
-//     },
-//   },
-//   buyer: {
-//     email: "bayuseptyan925@gmail.com",
-//     userId: "RBK-0000010",
-//     status: "Belum Transfer",
-//   },
-// };
-
-// // Data pengiriman, siap integrasi backend
-// const shippingInfo = {
-//   noResi: "JX3474124013",
-//   ekspedisi: "J&T Express Indonesia",
-//   buktiFile: {
-//     url: contohResi,
-//     filename: "resi-iphone.jpg",
-//   },
-// };
-
-// // Data pengajuan dummy, siap integrasi backend
-// const submissionInfo = {
-//   alasan: "Barang diterima pembeli dapat dilakukan pencairan dana",
-//   noResi: "JP3294450853",
-//   ekspedisi: "J&T Express Indonesia",
-//   buktiFile: {
-//     url: buktiPengajuan,
-//     filename: "screenshot-cekresi-j&t.jpg",
-//   },
-//   statusPengajuan: "Permintaan Ditinjau", // atau Ditolak/Diterima
-//   waktuAdminSetuju: null, // Date jika sudah disetujui
-// };
-
 // Komponen Informasi Pengiriman
 const InformasiPengiriman = ({ shippingInfo }) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+  <div className='bg-white rounded-lg border border-gray-200 p-6 mt-6'>
+    <h2 className='text-lg font-semibold text-gray-900 mb-4'>
       Informasi Pengiriman
     </h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+    <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-6'>
       <div>
-        <p className="text-sm text-gray-500 mb-1">No Resi</p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900 tracking-widest select-all">
+        <p className='text-sm text-gray-500 mb-1'>No Resi</p>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-gray-900 tracking-widest select-all'>
             {shippingInfo.noResi}
           </span>
           <button
-            className="text-xs text-blue-600 hover:underline"
+            className='text-xs text-blue-600 hover:underline'
             onClick={() => navigator.clipboard.writeText(shippingInfo.noResi)}
           >
             Salin
@@ -113,63 +64,66 @@ const InformasiPengiriman = ({ shippingInfo }) => (
         </div>
       </div>
       <div>
-        <p className="text-sm text-gray-500 mb-1">Ekspedisi</p>
-        <span className="text-sm font-medium text-gray-900">
+        <p className='text-sm text-gray-500 mb-1'>Ekspedisi</p>
+        <span className='text-sm font-medium text-gray-900'>
           {shippingInfo.ekspedisi}
         </span>
       </div>
     </div>
     <div>
-      <p className="text-sm text-gray-500 mb-1">Bukti Pengiriman</p>
-      <span className="text-sm font-medium text-gray-900">
+      <p className='text-sm text-gray-500 mb-1'>Bukti Pengiriman</p>
+      <span className='text-sm font-medium text-gray-900'>
         {shippingInfo.buktiFile.filename}
       </span>
-      <div className="mt-4 mb-4">
+      <div className='mt-4 mb-4'>
         <img
           src={shippingInfo.buktiFile.url}
-          alt="Bukti Resi"
-          className="rounded-lg w-full max-w-xl border mx-auto"
+          alt='Bukti Resi'
+          className='rounded-lg w-full max-w-xl border mx-auto'
         />
       </div>
-      <div className="flex gap-3 justify-center">
+      <div className='flex gap-3 justify-center'>
         <a
-          href={shippingInfo.buktiFile.url}
-          download
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium"
+          href={`${
+            import.meta.env.VITE_API_BASE_URL
+          }/download?url=${encodeURIComponent(
+            shippingInfo.buktiFile.url
+          )}&filename=bukti.jpg`}
+          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium'
         >
           <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
+            className='w-5 h-5'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            viewBox='0 0 24 24'
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              d='M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4'
             />
           </svg>
           Download
         </a>
         <a
           href={shippingInfo.buktiFile.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium"
+          target='_blank'
+          rel='noopener noreferrer'
+          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium'
         >
           <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
+            className='w-5 h-5'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            viewBox='0 0 24 24'
           >
-            <circle cx="12" cy="12" r="3" />
+            <circle cx='12' cy='12' r='3' />
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.4 15A7.97 7.97 0 0020 12c0-4.418-3.582-8-8-8S4 7.582 4 12c0 1.042.2 2.037.56 2.95"
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              d='M19.4 15A7.97 7.97 0 0020 12c0-4.418-3.582-8-8-8S4 7.582 4 12c0 1.042.2 2.037.56 2.95'
             />
           </svg>
           Preview
@@ -189,13 +143,13 @@ const InformasiPengajuan = ({
   onKonfirmasi,
   currentStatus,
 }) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+  <div className='bg-white rounded-lg border border-gray-200 p-6 mt-6'>
+    <h2 className='text-lg font-semibold text-gray-900 mb-4'>
       Informasi Pengajuan
     </h2>
-    <div className="mb-4">
-      <p className="text-sm text-gray-500 mb-1">Alasan Permintaan Konfirmasi</p>
-      <span className="text-sm font-medium text-gray-900">
+    <div className='mb-4'>
+      <p className='text-sm text-gray-500 mb-1'>Alasan Permintaan Konfirmasi</p>
+      <span className='text-sm font-medium text-gray-900'>
         {submissionInfo.alasan}
       </span>
     </div>
@@ -204,74 +158,77 @@ const InformasiPengajuan = ({
       currentStatus === "pengajuanDitolak" ||
       currentStatus === "barangDiterima"
     ) && (
-      <div className="flex gap-3 mb-4">
+      <div className='flex gap-3 mb-4'>
         <button
           onClick={onTolak}
-          className="bg-pink-100 text-pink-700 px-4 py-2 rounded font-medium"
+          className='bg-pink-100 text-pink-700 px-4 py-2 rounded font-medium'
         >
           Tolak
         </button>
         <button
           onClick={onSetuju}
-          className="bg-blue-700 text-white px-4 py-2 rounded font-medium"
+          className='bg-blue-700 text-white px-4 py-2 rounded font-medium'
         >
           Setujui
         </button>
       </div>
     )}
-    <div className="mb-4">
-      <p className="text-sm text-gray-500 mb-1">Permintaan Konfirmasi Buyer</p>
-      <span className="text-sm font-medium text-gray-900">
+    <div className='mb-4'>
+      <p className='text-sm text-gray-500 mb-1'>Permintaan Konfirmasi Buyer</p>
+      <span className='text-sm font-medium text-gray-900'>
         {submissionInfo.buktiFile.filename}
       </span>
-      <div className="mt-4 mb-4">
+      <div className='mt-4 mb-4'>
         <img
           src={submissionInfo.buktiFile.url}
-          alt="Bukti Pengajuan"
-          className="rounded-lg w-full max-w-xl border mx-auto"
+          alt='Bukti Pengajuan'
+          className='rounded-lg w-full max-w-xl border mx-auto'
         />
       </div>
-      <div className="flex gap-3 justify-center">
+      <div className='flex gap-3 justify-center'>
         <a
-          href={submissionInfo.buktiFile.url}
-          download
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium"
+          href={`${
+            import.meta.env.VITE_API_BASE_URL
+          }/download?url=${encodeURIComponent(
+            submissionInfo.buktiFile.url
+          )}&filename=bukti.jpg`}
+          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium'
         >
           <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
+            className='w-5 h-5'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            viewBox='0 0 24 24'
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4'
             />
           </svg>
           Download
         </a>
         <a
           href={submissionInfo.buktiFile.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium"
+          target='_blank'
+          rel='noopener noreferrer'
+          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium'
         >
           <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
+            className='w-5 h-5'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            viewBox='0 0 24 24'
           >
-            <circle cx="12" cy="12" r="3" />
+            <circle cx='12' cy='12' r='3' />
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19.4 15A7.97 7.97 0 0020 12c0-4.418-3.582-8-8-8S4 7.582 4 12c0 1.042.2 2.037.56 2.95"
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M19.4 15A7.97 7.97 0 0020 12c0-4.418-3.582-8-8-8S4 7.582 4 12c0 1.042.2 2.037.56 2.95'
             />
           </svg>
           Preview
@@ -281,30 +238,30 @@ const InformasiPengajuan = ({
 
     {/* Status refund */}
     {currentStatus === "pengembalianDana" && (
-      <div className="mt-4 text-sm text-red-600 font-semibold text-center">
+      <div className='mt-4 text-sm text-red-600 font-semibold text-center'>
         Dana transaksi telah dikembalikan ke buyer.
       </div>
     )}
 
     {/* Popup konfirmasi */}
     {showKonfirmasi && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-        <div className="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-          <p className="mb-4 text-center text-base font-semibold">
+      <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50'>
+        <div className='bg-white rounded-lg p-6 shadow-lg max-w-sm w-full'>
+          <p className='mb-4 text-center text-base font-semibold'>
             {konfirmasiType === "setuju"
               ? "Setujui permintaan konfirmasi ini?"
               : "Tolak permintaan konfirmasi ini?"}
           </p>
-          <div className="flex gap-3 justify-center">
+          <div className='flex gap-3 justify-center'>
             <button
               onClick={() => onKonfirmasi(true)}
-              className="bg-blue-700 text-white px-4 py-2 rounded font-medium"
+              className='bg-blue-700 text-white px-4 py-2 rounded font-medium'
             >
               Ya
             </button>
             <button
               onClick={() => onKonfirmasi(false)}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium"
+              className='bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium'
             >
               Batal
             </button>
@@ -488,7 +445,7 @@ const RekberDetailPage = () => {
 
   if (!initialRekberInfo) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className='text-center py-8 text-gray-500'>
         Memuat data transaksi...
       </div>
     );
@@ -513,31 +470,31 @@ const RekberDetailPage = () => {
     ["menungguPersetujuanAdmin", "pengajuanDitolak"].includes(currentStatus)
   ) {
     pengajuanBadge = effectivePengajuanStatus ? (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800'>
         {effectivePengajuanStatus}
       </span>
     ) : null;
   } else if (currentStatus === "pengajuanKonfirmasi") {
     pengajuanBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800'>
         Pengajuan Diterima
       </span>
     );
   } else if (currentStatus === "dalamPengiriman") {
     pengajuanBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700'>
         Tanpa Pengajuan
       </span>
     );
   } else if (currentStatus === "pengembalianDana") {
     pengajuanBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800'>
         Dana Dikembalikan
       </span>
     );
   } else if (currentStatus === "komplain") {
     pengajuanBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800'>
         Komplain
       </span>
     );
@@ -577,7 +534,7 @@ const RekberDetailPage = () => {
     deadlineLabel = "Status Rekber";
     deadlineDate = null;
     deadlineBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700'>
         Rekber Dibatalkan
       </span>
     );
@@ -588,7 +545,7 @@ const RekberDetailPage = () => {
     deadlineLabel = "Status Rekber";
     deadlineDate = null;
     deadlineBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800'>
         Dana Dikembalikan
       </span>
     );
@@ -596,7 +553,7 @@ const RekberDetailPage = () => {
     deadlineLabel = "Status Rekber";
     deadlineDate = null;
     deadlineBadge = (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800">
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800'>
         Komplain
       </span>
     );
@@ -691,17 +648,17 @@ const RekberDetailPage = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className='w-full'>
       <Breadcrumb />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="space-y-6">
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6'>
+        <div className='space-y-6'>
           <TrackingDemo
             currentStatus={currentStatus}
             setCurrentStatus={setCurrentStatus}
             timeInfo={timeInfo}
           />
         </div>
-        <div className="space-y-6">
+        <div className='space-y-6'>
           <RekberInfoSection {...infoProps} />
           {(currentStatus === "dalamPengiriman" ||
             showSubmission ||

@@ -16,7 +16,8 @@ const mapStatusToUI = (apiStatus) => {
     waiting_shipment: "Menunggu Resi",
     shipped: "Dalam Pengiriman",
     completed: "Transaksi Selesai",
-    refunded: "Pengembalian",
+    complain: "Komplain",
+    refunded: "Dana Dikembalikan",
     canceled: "Dibatalkan",
   };
   return map[apiStatus] || "Status Tidak Dikenal";
@@ -56,6 +57,8 @@ const getStatusRekberClass = (status) => {
       return `${base} bg-yellow-200 text-yellow-800`;
     case "completed":
       return `${base} bg-green-200 text-green-800`;
+    case "complain":
+      return `${base} bg-orange-200 text-orange-800`;
     case "refunded":
       return `${base} bg-green-200 text-green-800`;
     case "canceled":
@@ -129,7 +132,10 @@ const TransactionTable = ({
               </thead>
               <tbody>
                 {[...Array(5)].map((_, index) => (
-                  <tr key={index} className='h-[38px] border-b border-[#c9c9c9] bg-white'>
+                  <tr
+                    key={index}
+                    className='h-[38px] border-b border-[#c9c9c9] bg-white'
+                  >
                     <td className='px-2 text-sm text-[#5c5c5c]'>
                       <div className='bg-gray-200 h-4 w-full rounded'></div>
                     </td>
@@ -184,8 +190,9 @@ const TransactionTable = ({
                 {transactions.map((txn, index) => (
                   <TableRow
                     key={txn.id}
-                    className={`h-[38px] border-b border-[#c9c9c9] ${index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"
-                      } hover:bg-[#e6f7ff]`}
+                    className={`h-[38px] border-b border-[#c9c9c9] ${
+                      index % 2 === 0 ? "bg-white" : "bg-[#f3f3f3]"
+                    } hover:bg-[#e6f7ff]`}
                   >
                     <TableCell className='px-2 py-0 border-r border-[#c9c9c9] text-sm text-[#5c5c5c]'>
                       {txn.transactionCode}
@@ -248,10 +255,11 @@ const TransactionTable = ({
             <button
               key={index + 1}
               onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${currentPage === index + 1
+              className={`px-3 py-1 border border-[#c9c9c9] rounded text-sm ${
+                currentPage === index + 1
                   ? "bg-blue-500 text-white"
                   : "bg-white text-[#5c5c5c] hover:bg-[#e6f7ff]"
-                }`}
+              }`}
             >
               {index + 1}
             </button>
