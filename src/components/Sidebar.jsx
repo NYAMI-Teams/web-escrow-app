@@ -60,8 +60,7 @@ const Sidebar = () => {
           {renderNavItem(
             "/users",
             <UsersRound className='w-4 h-4 stroke-current' />,
-            "User",
-            99
+            "User"
           )}
 
           <b className='px-6 mt-4 mb-1 text-base text-darkslateblue'>
@@ -70,8 +69,7 @@ const Sidebar = () => {
           {renderNavItem(
             "/transactions",
             <Activity className='w-4 h-4 stroke-current' />,
-            "Transaksi",
-            99
+            "Transaksi"
           )}
 
           <b className='px-6 mt-4 mb-1 text-base text-darkslateblue'>
