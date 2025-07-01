@@ -10,7 +10,7 @@ import {
 } from "../ui/table";
 import { ChevronDownIcon, ArrowRightIcon, CheckCircle2, XCircle } from "lucide-react";
 import { getListComplaint } from "../../services/complaint.service";
-import { formatDateTime } from "../lib/dateFormat";
+import { formatDate } from "../lib/dateFormat";
 
 const STATUS_COLORS = {
     "Dalam Investigasi": "text-blue-500",
@@ -203,7 +203,7 @@ const DataTableBarangHilang = ({ onRowDetail, filterConfig, loading = false }) =
             const formattedData = res.map(item => ({
                 ...item,
                 transaction_code: item?.transaction?.transaction_code,
-                waktu: formatDateTime(item?.created_at),
+                waktu: formatDate(item?.created_at),
                 nama: item?.transaction?.item_name,
                 pembeli: item?.buyer?.email,
                 noResi: item?.transaction?.shipment?.tracking_number || "-",

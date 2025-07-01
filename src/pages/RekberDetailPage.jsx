@@ -235,6 +235,14 @@ const InformasiPengajuan = ({
         </a>
       </div>
     </div>
+
+    {/* Status refund */}
+    {currentStatus === "pengembalianDana" && (
+      <div className='mt-4 text-sm text-red-600 font-semibold text-center'>
+        Dana transaksi telah dikembalikan ke buyer.
+      </div>
+    )}
+
     {/* Popup konfirmasi */}
     {showKonfirmasi && (
       <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50'>
@@ -278,6 +286,10 @@ const mapApiStatusToCurrentStatus = (apiStatus) => {
       return "rekberBatal";
     case "fund_release_requested":
       return "menungguPersetujuanAdmin";
+    case "refunded":
+      return "pengembalianDana";
+    case "complain":
+      return "komplain";
     default:
       return "menungguPembayaran";
   }
@@ -406,6 +418,10 @@ const RekberDetailPage = () => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    console.log("currentStatus:", currentStatus);
+  }, [currentStatus]);
+
   if (!initialRekberInfo) {
     return (
       <div className='text-center py-8 text-gray-500'>
@@ -459,6 +475,18 @@ const RekberDetailPage = () => {
         Tanpa Pengajuan
       </span>
     );
+  } else if (currentStatus === "pengembalianDana") {
+    pengajuanBadge = (
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800'>
+        Dana Dikembalikan
+      </span>
+    );
+  } else if (currentStatus === "komplain") {
+    pengajuanBadge = (
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800'>
+        Komplain
+      </span>
+    );
   }
   let deadlineLabel = "Buyer transfer sebelum";
   let deadlineDate = null;
@@ -502,6 +530,22 @@ const RekberDetailPage = () => {
   } else if (currentStatus === "barangDiterima") {
     deadlineLabel = "Status pengajuan";
     deadlineDate = null;
+  } else if (currentStatus === "pengembalianDana") {
+    deadlineLabel = "Status Rekber";
+    deadlineDate = null;
+    deadlineBadge = (
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-200 text-green-800'>
+        Dana Dikembalikan
+      </span>
+    );
+  } else if (currentStatus === "komplain") {
+    deadlineLabel = "Status Rekber";
+    deadlineDate = null;
+    deadlineBadge = (
+      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-300 text-red-800'>
+        Komplain
+      </span>
+    );
   } else {
     deadlineLabel = "Buyer transfer sebelum";
     deadlineDate = waktuBikinRekber
@@ -583,6 +627,8 @@ const RekberDetailPage = () => {
   const showSubmission =
     currentStatus === "menungguPersetujuanAdmin" ||
     currentStatus === "pengajuanKonfirmasi" ||
+    currentStatus === "pengembalianDana" ||
+    currentStatus === "komplain" ||
     currentStatus === "pengajuanDitolak";
   const submissionProps = {
     ...submissionInfo,

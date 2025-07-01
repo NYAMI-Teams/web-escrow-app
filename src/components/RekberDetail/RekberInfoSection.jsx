@@ -33,6 +33,43 @@ const handleCopy = (text) => {
   }
 };
 
+const getStatusRekberClass = (status) => {
+  const base =
+    "inline-flex items-center justify-center px-2 py-[2px] rounded-full text-xs font-semibold whitespace-nowrap";
+
+  switch (status) {
+    case "pending_payment":
+      return `${base} bg-gray-200 text-gray-700`;
+    case "waiting_shipment":
+      return `${base} bg-purple-200 text-purple-800`;
+    case "shipped":
+      return `${base} bg-yellow-200 text-yellow-800`;
+    case "completed":
+      return `${base} bg-green-200 text-green-800`;
+    case "refunded":
+      return `${base} bg-green-200 text-green-800`;
+    case "canceled":
+      return `${base} bg-red-300 text-red-800`;
+    case "complain":
+      return `${base} bg-red-300 text-red-800`;
+    default:
+      return `${base} bg-gray-100 text-gray-600`;
+  }
+};
+
+const mapStatusToUI = (apiStatus) => {
+  const map = {
+    pending_payment: "Menunggu Pembayaran",
+    waiting_shipment: "Menunggu Resi",
+    shipped: "Dalam Pengiriman",
+    completed: "Transaksi Selesai",
+    refunded: "Pengembalian",
+    complain: "Sedang Dalam Proses Komplain",
+    canceled: "Dibatalkan",
+  };
+  return map[apiStatus] || "Status Tidak Dikenal";
+};
+
 const RekberInfoSection = ({
   deadlineLabel = "Buyer transfer sebelum",
   deadlineDate = null,
@@ -293,10 +330,8 @@ const RekberInfoSection = ({
               </div>
             ) : (
               <div className='flex items-center gap-2'>
-                <span className='bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-medium'>
-                  {mapApiStatusToCurrentStatus(buyer.status) ||
-                    buyer.status ||
-                    "Status Tidak Diketahui"}
+                <span className={getStatusRekberClass(buyer.status)}>
+                  {mapStatusToUI(buyer.status)}
                 </span>
               </div>
             )}
@@ -305,27 +340,6 @@ const RekberInfoSection = ({
       </div>
     </div>
   );
-};
-
-const mapApiStatusToCurrentStatus = (apiStatus) => {
-  switch (apiStatus) {
-    case "pending_payment":
-      return "Menunggu Pembayaran";
-    case "waiting_shipment":
-      return "Menunggu Pengiriman";
-    case "shipped":
-      return "Barang Dikirim";
-    case "completed":
-      return "Transaksi Selesai";
-    case "canceled":
-      return "Transaksi Dibatalkan";
-    case "complain":
-      return "Komplain";
-    case "refunded":
-      return "Dana Dikembalikan";
-    default:
-      return null;
-  }
 };
 
 export default RekberInfoSection;
