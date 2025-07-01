@@ -21,7 +21,7 @@ const UserFilters = ({
       <div className='max-w-[300px] w-full md:w-auto'>
         <AdvancedSearch
           Icon={Search}
-          placeholder='Cari ID, nama dan email'
+          placeholder='Cari Email'
           value={searchQuery}
           onChange={onSearchChange}
           disabled={loading}
@@ -49,7 +49,7 @@ const UserFilters = ({
         <div className='w-[240px]'>
           <DateRangeDropdown
             selectedRange={selectedDateRange}
-            onChange={onDateChange}
+            onRangeChange={onDateChange}
           />
         </div>
 
