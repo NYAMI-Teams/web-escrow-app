@@ -315,6 +315,27 @@ const InformasiPengajuan = ({
   </div>
 );
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Maps API status to the corresponding current status.
+ *
+ * @param {string} apiStatus - The status received from the API.
+ * @returns {string} - The mapped current status used in the application.
+ * 
+ * Possible API statuses and their mappings:
+ * - "pending_payment": "menungguPembayaran"
+ * - "waiting_shipment": "menungguResi"
+ * - "shipped": "dalamPengiriman"
+ * - "completed": "barangDiterima"
+ * - "canceled": "rekberBatal"
+ * - "fund_release_requested": "menungguPersetujuanAdmin"
+ * - "refunded": "pengembalianDana"
+ * - "complain": "komplain"
+ * 
+ * Defaults to "menungguPembayaran" if the API status is unrecognized.
+ */
+
+/*******  9ef13deb-3e31-4e88-820c-4d771002c28e  *******/
 const mapApiStatusToCurrentStatus = (apiStatus) => {
   switch (apiStatus) {
     case "pending_payment":
@@ -473,16 +494,6 @@ const RekberDetailPage = () => {
     );
   }
 
-  // Ambil data tracking sesuai status
-  // const currentTracking = trackingData[currentStatus];
-
-  // Ambil waktu bikin rekber dan waktu buyer bayar dari step tracking
-  // const waktuBikinRekber = currentTracking.steps.find(
-  //   (s) => s.label === "Waktu bikin rekber"
-  // )?.timestamp;
-  // const waktuBuyerBayar = currentTracking.steps.find(
-  //   (s) => s.label === "Waktu buyer bayar"
-  // )?.timestamp;
   const waktuBikinRekber = timeInfo.createTime;
   const waktuBuyerBayar = timeInfo.paymentTime;
 
