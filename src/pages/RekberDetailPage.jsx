@@ -315,6 +315,7 @@ const RekberDetailPage = () => {
   const [shippingInfo, setShippingInfo] = useState(null);
   const [submissionInfo, setSubmissionInfo] = useState(null);
   const [timeInfo, setTimeInfo] = useState(null);
+  const [isFundReleaseRequested, setIsFundReleaseRequested] = useState(false);
 
   const { transactionId } = useParams();
 
@@ -392,6 +393,8 @@ const RekberDetailPage = () => {
         waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
       });
 
+      setIsFundReleaseRequested(item.fundReleaseRequest.requested);
+
       // Debugging log di sini
       if (item.status === "completed") {
         // Prioritaskan status 'completed'
@@ -430,16 +433,6 @@ const RekberDetailPage = () => {
     );
   }
 
-  // Ambil data tracking sesuai status
-  // const currentTracking = trackingData[currentStatus];
-
-  // Ambil waktu bikin rekber dan waktu buyer bayar dari step tracking
-  // const waktuBikinRekber = currentTracking.steps.find(
-  //   (s) => s.label === "Waktu bikin rekber"
-  // )?.timestamp;
-  // const waktuBuyerBayar = currentTracking.steps.find(
-  //   (s) => s.label === "Waktu buyer bayar"
-  // )?.timestamp;
   const waktuBikinRekber = timeInfo.createTime;
   const waktuBuyerBayar = timeInfo.paymentTime;
 
@@ -624,12 +617,13 @@ const RekberDetailPage = () => {
   };
 
   // Untuk status menungguPersetujuanAdmin dan pengajuanKonfirmasi/pengajuanDitolak
-  const showSubmission =
-    currentStatus === "menungguPersetujuanAdmin" ||
-    currentStatus === "pengajuanKonfirmasi" ||
-    currentStatus === "pengembalianDana" ||
-    currentStatus === "komplain" ||
-    currentStatus === "pengajuanDitolak";
+  // const showSubmission =
+  //   currentStatus === "menungguPersetujuanAdmin" ||
+  //   currentStatus === "pengajuanKonfirmasi" ||
+  //   currentStatus === "pengembalianDana" ||
+  //   currentStatus === "komplain" ||
+  //   currentStatus === "pengajuanDitolak";
+  const showSubmission = isFundReleaseRequested;
   const submissionProps = {
     ...submissionInfo,
     statusPengajuan: pengajuanStatus,
@@ -654,7 +648,7 @@ const RekberDetailPage = () => {
             currentStatus === "barangDiterima") && (
             <InformasiPengiriman shippingInfo={shippingInfo} />
           )}
-          {(showSubmission || currentStatus === "barangDiterima") && (
+          {showSubmission && (
             <InformasiPengajuan
               submissionInfo={submissionProps}
               onSetuju={handleSetuju}
