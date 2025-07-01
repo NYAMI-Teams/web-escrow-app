@@ -1,15 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { UsersRound, Activity, Shuffle, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    navigate("/", { replace: true });
+    logout();
   };
 
   const renderNavItem = (path, icon, label, badgeCount) => {
@@ -81,12 +79,12 @@ const Sidebar = () => {
           </b>
           {renderNavItem(
             "/barang-hilang",
-            <Shuffle className="w-4 h-4 stroke-current" />,
+            <Shuffle className='w-4 h-4 stroke-current' />,
             "Barang Hilang"
           )}
           {renderNavItem(
             "/barang-rusak",
-            <Shuffle className="w-4 h-4 stroke-current" />,
+            <Shuffle className='w-4 h-4 stroke-current' />,
             "Barang Rusak"
           )}
           {/* {renderNavItem(
@@ -94,7 +92,6 @@ const Sidebar = () => {
             <Shuffle className="w-4 h-4 stroke-current" />,
             "Barang Ga Sesuai"
           )} */}
-          
         </nav>
       </div>
 
