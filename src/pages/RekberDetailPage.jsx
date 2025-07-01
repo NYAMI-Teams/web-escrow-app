@@ -272,27 +272,6 @@ const InformasiPengajuan = ({
   </div>
 );
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Maps API status to the corresponding current status.
- *
- * @param {string} apiStatus - The status received from the API.
- * @returns {string} - The mapped current status used in the application.
- * 
- * Possible API statuses and their mappings:
- * - "pending_payment": "menungguPembayaran"
- * - "waiting_shipment": "menungguResi"
- * - "shipped": "dalamPengiriman"
- * - "completed": "barangDiterima"
- * - "canceled": "rekberBatal"
- * - "fund_release_requested": "menungguPersetujuanAdmin"
- * - "refunded": "pengembalianDana"
- * - "complain": "komplain"
- * 
- * Defaults to "menungguPembayaran" if the API status is unrecognized.
- */
-
-/*******  9ef13deb-3e31-4e88-820c-4d771002c28e  *******/
 const mapApiStatusToCurrentStatus = (apiStatus) => {
   switch (apiStatus) {
     case "pending_payment":
@@ -336,6 +315,7 @@ const RekberDetailPage = () => {
   const [shippingInfo, setShippingInfo] = useState(null);
   const [submissionInfo, setSubmissionInfo] = useState(null);
   const [timeInfo, setTimeInfo] = useState(null);
+  const [isFundReleaseRequested, setIsFundReleaseRequested] = useState(false);
 
   const { transactionId } = useParams();
 
@@ -412,6 +392,8 @@ const RekberDetailPage = () => {
         ),
         waktuAdminSetuju: item.fundReleaseRequest.resolvedAt,
       });
+
+      setIsFundReleaseRequested(item.fundReleaseRequest.requested);
 
       // Debugging log di sini
       if (item.status === "completed") {
@@ -635,12 +617,13 @@ const RekberDetailPage = () => {
   };
 
   // Untuk status menungguPersetujuanAdmin dan pengajuanKonfirmasi/pengajuanDitolak
-  const showSubmission =
-    currentStatus === "menungguPersetujuanAdmin" ||
-    currentStatus === "pengajuanKonfirmasi" ||
-    currentStatus === "pengembalianDana" ||
-    currentStatus === "komplain" ||
-    currentStatus === "pengajuanDitolak";
+  // const showSubmission =
+  //   currentStatus === "menungguPersetujuanAdmin" ||
+  //   currentStatus === "pengajuanKonfirmasi" ||
+  //   currentStatus === "pengembalianDana" ||
+  //   currentStatus === "komplain" ||
+  //   currentStatus === "pengajuanDitolak";
+  const showSubmission = isFundReleaseRequested;
   const submissionProps = {
     ...submissionInfo,
     statusPengajuan: pengajuanStatus,
@@ -665,7 +648,7 @@ const RekberDetailPage = () => {
             currentStatus === "barangDiterima") && (
             <InformasiPengiriman shippingInfo={shippingInfo} />
           )}
-          {(showSubmission || currentStatus === "barangDiterima") && (
+          {showSubmission && (
             <InformasiPengajuan
               submissionInfo={submissionProps}
               onSetuju={handleSetuju}
