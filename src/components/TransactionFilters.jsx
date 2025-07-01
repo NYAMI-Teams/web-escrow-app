@@ -65,7 +65,7 @@ const TransactionFilters = ({
         <div className='w-[240px]'>
           <DateRangeDropdown
             selectedRange={selectedDateRange}
-            onChange={onDateChange}
+            onRangeChange={onDateChange}
           />
         </div>
 

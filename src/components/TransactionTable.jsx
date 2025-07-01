@@ -57,7 +57,7 @@ const getStatusRekberClass = (status) => {
     case "completed":
       return `${base} bg-green-200 text-green-800`;
     case "refunded":
-      return `${base} bg-red-200 text-red-800`;
+      return `${base} bg-green-200 text-green-800`;
     case "canceled":
       return `${base} bg-red-300 text-red-800`;
     default:
