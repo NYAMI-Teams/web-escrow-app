@@ -605,6 +605,7 @@ const RekberDetailPage = () => {
           setPengajuanStatus("Diterima");
           setWaktuAdminSetuju(new Date().toISOString());
           setCurrentStatus("pengajuanKonfirmasi");
+          setShowKonfirmasi(false);
         } else {
           await postFundRelease(transactionId, "reject");
           setPengajuanStatus("Ditolak");
