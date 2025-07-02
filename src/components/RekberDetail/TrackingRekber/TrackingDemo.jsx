@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, Megaphone } from "lucide-react";
 import VerticalStep from "./VerticalStep";
 import { formatDateTime } from "../../lib/dateFormat";
 
@@ -160,6 +160,53 @@ const trackingData = {
       { label: "Rekber dibatalkan oleh seller", status: "current" },
     ],
   },
+  pengembalianDana: {
+    badge: {
+      text: "Rekber Selesai (Pengembalian Dana)",
+      bgColor: "#e6f4ea",
+      textColor: "#1e4620",
+      icon: CheckCircle,
+    },
+    steps: [
+      { label: "Waktu bikin rekber", status: "completed", isSuccess: true },
+      { label: "Waktu buyer bayar", status: "completed", isSuccess: true },
+      {
+        label: "Waktu seller memberikan resi",
+        status: "completed",
+        isSuccess: true,
+      },
+      {
+        label: "Complain diajukan oleh buyer",
+        status: "completed",
+        isSuccess: true,
+      },
+      {
+        label: "Pengembalian Dana",
+        status: "completed",
+        isSuccess: true,
+      },
+    ],
+  },
+  komplain: {
+    badge: {
+      text: "Komplain Rekber",
+      bgColor: "#fca5a5",
+      textColor: "#991b1b",
+      icon: Megaphone,
+    },
+    steps: [
+      { label: "Waktu bikin rekber", status: "completed", },
+      { label: "Waktu buyer bayar", status: "completed",},
+      {
+        label: "Waktu seller memberikan resi",
+        status: "completed",
+      },
+      {
+        label: "Complain diajukan oleh buyer",
+        status: "current",
+      },
+    ],
+  },
 };
 
 // Helper ambil timestamp
@@ -170,6 +217,14 @@ const getTimestampFromTimeInfo = (label, timeInfo) => {
 
 const TrackingDemo = ({ currentStatus, timeInfo }) => {
   const currentData = trackingData[currentStatus];
+
+  if (!currentData) {
+  return (
+    <div className="p-6">
+      <span className="text-sm text-red-500">Status rekber tidak valid. Sekarang : {currentStatus}</span>
+    </div>
+  );
+}
 
   return (
     <div className="flex flex-col gap-6 p-6">

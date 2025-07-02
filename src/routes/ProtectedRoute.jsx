@@ -1,23 +1,12 @@
 import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("accessToken");
+  const { isLoggedIn, isChecking, isAdmin } = useAuth();
 
-  if (!token) {
-    return <Navigate to='/' replace />;
-  }
+  if (isChecking) return null; // bisa diganti dengan loading spinner
 
-  try {
-    const decoded = jwtDecode(token);
-    const now = Date.now() / 1000;
-    if (decoded.exp && decoded.exp < now) {
-      localStorage.removeItem("accessToken");
-      return <Navigate to='/' replace />;
-    }
-  } catch (err) {
-    console.error("Token tidak valid:", err);
-    localStorage.removeItem("accessToken");
+  if (!isLoggedIn || !isAdmin) {
     return <Navigate to='/' replace />;
   }
 

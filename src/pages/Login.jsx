@@ -14,6 +14,7 @@ import logo from "../assets/logorekber.png";
 import sideImage from "../assets/side-image.png";
 import { loginUser } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,9 +30,14 @@ const LoginForm = () => {
 
     try {
       const data = await loginUser(email, password);
-      localStorage.setItem("accessToken", data.accessToken);
 
-      navigate("/users"); // redirect setelah login ini
+      if (!data.isAdmin) {
+        alert("Akses ditolak: hanya admin yang dapat login.");
+        return;
+      }
+
+      login(data.accessToken);
+      navigate("/users");
     } catch (error) {
       alert(error?.message || "Login gagal, silakan coba lagi.");
     } finally {

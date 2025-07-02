@@ -15,7 +15,7 @@ const TransactionFilters = ({
   selectedDateRange,
   onDateChange,
   onResetFilters,
-  loading = false
+  loading = false,
 }) => {
   return (
     <div className='flex items-center justify-between flex-wrap gap-4 mb-4'>
@@ -27,7 +27,7 @@ const TransactionFilters = ({
           onChange={onSearchChange}
           disabled={loading}
           loading={loading}
-          onClear={() => onSearchChange('')}
+          onClear={() => onSearchChange("")}
         />
       </div>
 
@@ -39,8 +39,9 @@ const TransactionFilters = ({
               { label: "Menunggu Pembayaran", value: "pending_payment" },
               { label: "Menunggu Resi", value: "waiting_shipment" },
               { label: "Dalam Pengiriman", value: "shipped" },
-              { label: "Barang Diterima", value: "completed" },
-              { label: "Pengembalian", value: "refunded" },
+              { label: "Komplain", value: "complain" },
+              { label: "Transaksi Selesai", value: "completed" },
+              { label: "Dana dikembalikan", value: "refunded" },
               { label: "Dibatalkan", value: "canceled" },
             ]}
             value={selectedStatus}
@@ -65,7 +66,7 @@ const TransactionFilters = ({
         <div className='w-[240px]'>
           <DateRangeDropdown
             selectedRange={selectedDateRange}
-            onChange={onDateChange}
+            onRangeChange={onDateChange}
           />
         </div>
 
