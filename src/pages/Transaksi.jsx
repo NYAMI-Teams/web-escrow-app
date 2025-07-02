@@ -18,6 +18,10 @@ const TransaksiPage = () => {
 
   const [debouncedSearch] = useDebounce(searchQuery, 500);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedStatus, selectedFundStatus, selectedDateRange]);
+
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedStatus([]);
