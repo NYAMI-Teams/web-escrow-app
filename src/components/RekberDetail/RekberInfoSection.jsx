@@ -236,7 +236,7 @@ const RekberInfoSection = ({
           </div>
           <div>
             <p className='text-sm text-gray-500 mb-1'>
-              Biaya Jasa Aplikasi (0.8%)
+              Biaya Jasa Aplikasi
             </p>
             <span className='text-sm font-medium text-gray-900'>
               {bill.serviceFee}

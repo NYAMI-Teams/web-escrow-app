@@ -10,6 +10,7 @@ import {
   getComplaintDetail,
   resolveComplaintStatus,
 } from "../services/complaint.service";
+import { formatCurrency } from "../components/lib/utils";
 
 const BreadcrumbDetailComplain = ({ idKomplain }) => (
   <nav className='flex items-center space-x-2 text-sm mb-6'>
@@ -65,13 +66,6 @@ const mapStatusComplaint = {
   rejected_by_seller: "Seller Tolak",
   rejected_by_admin: "Komplain Dibatalkan",
 };
-
-// const komplainData = location.state?.data || {
-//   id: "12345678901",
-//   nama: "iPhone 13 Pro Max",
-//   pembeli: "bayuseptyan925@gmail.com",
-// };
-
 const isVideo = (url) =>
   /\.(mp4|mov|avi|mkv|webm|flv|wmv|quicktime)(-[\d]+)?$/i.test(url);
 
@@ -88,9 +82,8 @@ const getExtensionFromUrl = (url) => {
 const getDownloadUrl = (url, prefix = "bukti") => {
   const ext = getExtensionFromUrl(url);
   const filename = `${prefix}-${Date.now()}.${ext}`;
-  return `${
-    import.meta.env.VITE_API_BASE_URL
-  }/download?url=${encodeURIComponent(url)}&filename=${filename}`;
+  return `${import.meta.env.VITE_API_BASE_URL
+    }/download?url=${encodeURIComponent(url)}&filename=${filename}`;
 };
 
 const DetailBarangRusakPage = () => {
@@ -98,9 +91,6 @@ const DetailBarangRusakPage = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState(null);
-  const [status, setStatus] = useState("");
-  const [adminActionTimestamp, setAdminActionTimestamp] = useState(null);
-  const [isRejectedByAdmin, setIsRejectedByAdmin] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -109,111 +99,12 @@ const DetailBarangRusakPage = () => {
   const fetchData = async () => {
     try {
       const res = await getComplaintDetail(params?.id);
-      /* 
-   {
-    "id": "1ccd22cb-ae86-4c0e-9642-e6c0a715483d",
-    "transaction_id": "715a177f-8332-445a-8d81-b0b9f0434980",
-    "buyer_id": "08377c03-a1bc-4b7d-9cb5-bec50c1d8b77",
-    "type": "damaged",
-    "status": "completed",
-    "buyer_reason": "Gjmhgfr",
-    "buyer_evidence_urls": [
-        "https://rekbr.sgp1.digitaloceanspaces.com/IMG_3496.jpg"
-    ],
-    "seller_response_deadline": "2025-06-27T09:06:42.845Z",
-    "seller_response_reason": "tolong mamah aku mau makan nasi goreng",
-    "seller_evidence_urls": [],
-    "seller_decision": "approved",
-    "seller_responded_at": "2025-06-25T09:07:40.823Z",
-    "buyer_requested_confirmation_at": "2025-06-25T09:35:35.056Z",
-    "buyer_requested_confirmation_reason": "Saya lihat barang sudah sampai",
-    "buyer_requested_confirmation_evidence_urls": [
-        "https://rekbr.sgp1.digitaloceanspaces.com/16B92C2C-1331-4BBB-90BF-80F3FC634179.jpg"
-    ],
-    "request_confirmation_status": "approved",
-    "request_confirmation_admin_id": "668ae603-f741-469f-a644-14c712026870",
-    "admin_approved_confirmation_at": "2025-06-25T09:39:45.267Z",
-    "admin_rejected_confirmation_at": null,
-    "seller_confirm_deadline": "2025-06-25T09:41:45.262Z",
-    "seller_confirmed_return_at": "2025-06-25T09:53:47.545Z",
-    "buyer_deadline_input_shipment": "2025-06-27T09:07:40.823Z",
-    "canceled_by_buyer_at": null,
-    "admin_decision": null,
-    "admin_responded_at": "2025-06-25T09:39:45.267Z",
-    "resolved_at": "2025-06-25T09:53:47.545Z",
-    "created_at": "2025-06-25T09:06:42.846Z",
-    "updated_at": "2025-06-25T09:53:47.548Z",
-    "transaction": {
-        "id": "715a177f-8332-445a-8d81-b0b9f0434980",
-        "transaction_code": "TRX-041924-1153",
-        "seller_id": "f49a1215-6847-4c00-b73a-8dd438d1acd3",
-        "buyer_id": "08377c03-a1bc-4b7d-9cb5-bec50c1d8b77",
-        "item_name": "Dummy (Barang Rusak, Seller Approve)",
-        "item_price": 2500000,
-        "platform_fee": 25000,
-        "insurance_fee": 0,
-        "total_amount": 2525000,
-        "status": "refunded",
-        "virtual_account_number": "8883330319615",
-        "paid_at": "2025-06-25T06:47:31.825Z",
-        "payment_deadline": "2025-06-25T06:49:21.922Z",
-        "shipment_deadline": "2025-06-25T06:49:31.825Z",
-        "buyer_confirm_deadline": null,
-        "confirmed_at": null,
-        "withdrawal_bank_account_id": "15253586-0101-4eb4-acfa-83e021a85e64",
-        "withdrawn_at": null,
-        "withdrawn_amount": null,
-        "cancelled_at": null,
-        "cancelled_by_id": null,
-        "cancel_reason": null,
-        "refunded_at": "2025-06-25T09:53:47.559Z",
-        "refund_amount": 2500000,
-        "refund_reason": "Gjmhgfr",
-        "created_at": "2025-06-25T06:47:21.926Z",
-        "updated_at": "2025-06-25T09:53:47.560Z",
-        "buyer": {
-            "email": "mr.adrian40@gmail.com"
-        },
-        "seller": {
-            "email": "bayuseptyan43@gmail.com"
-        },
-        "shipment": {
-            "id": "0c2ffce4-7892-41cb-a0ab-e4d3be7b4106",
-            "transaction_id": "715a177f-8332-445a-8d81-b0b9f0434980",
-            "courier_id": "23be3cdf-0591-4eec-83a4-e88d860317c6",
-            "tracking_number": "JNT890364",
-            "shipment_date": "2025-06-25T06:47:51.631Z",
-            "received_date": null,
-            "photo_url": "https://rekbr.sgp1.digitaloceanspaces.com/44925F91-FB4C-43DE-A1B9-A430C6B7D73F.jpg",
-            "created_at": "2025-06-25T06:47:51.632Z",
-            "updated_at": "2025-06-25T06:47:51.632Z",
-            "courier": {
-                "id": "23be3cdf-0591-4eec-83a4-e88d860317c6",
-                "name": "J&T Express Indonesia"
-            }
-        }
-    },
-    "return_shipment": {
-        "id": "f362b45c-fa85-41e8-9bbc-c6f3ff64967d",
-        "complaint_id": "1ccd22cb-ae86-4c0e-9642-e6c0a715483d",
-        "courier_id": "c194d8e4-ff82-44b8-99a1-246e916b3f06",
-        "tracking_number": "Ghkngds",
-        "shipment_date": "2025-06-25T09:08:00.486Z",
-        "received_date": "2025-06-25T09:53:47.562Z",
-        "photo_url": "https://rekbr.sgp1.digitaloceanspaces.com/IMG_3496.jpg",
-        "created_at": "2025-06-25T09:08:00.488Z",
-        "updated_at": "2025-06-25T09:53:47.563Z",
-        "courier": {
-            "id": "c194d8e4-ff82-44b8-99a1-246e916b3f06",
-            "name": "Tiki Express"
-        }
-    }
-}
-      */
       const formattedData = {
         ...res,
         statusMap: mapStatusComplaint[res?.status] || "Menunggu Seller",
       };
+      console.log("Detail Komplain:", formattedData);
+      
       setData(formattedData);
     } catch (error) {
       alert(error.message);
@@ -326,18 +217,18 @@ const DetailBarangRusakPage = () => {
               {/* Chat bubble kanan: status dari step saat ini */}
               {(data?.status === "waiting_seller_approval" ||
                 data?.status === "canceled_by_buyer") && (
-                <div className='flex flex-col gap-1 items-end'>
-                  <div className='bg-blue-900 text-white text-sm px-4 py-2 rounded-lg rounded-tr-none w-fit'>
-                    Menunggu respon seller untuk komplain ini .....
+                  <div className='flex flex-col gap-1 items-end'>
+                    <div className='bg-blue-900 text-white text-sm px-4 py-2 rounded-lg rounded-tr-none w-fit'>
+                      Menunggu respon seller untuk komplain ini .....
+                    </div>
+                    <p className='text-xs text-red-600'>
+                      Menunggu respon sampai{" "}
+                      <strong>
+                        {formatDateTime(data?.seller_response_deadline)}
+                      </strong>
+                    </p>
                   </div>
-                  <p className='text-xs text-red-600'>
-                    Menunggu respon sampai{" "}
-                    <strong>
-                      {formatDateTime(data?.seller_response_deadline)}
-                    </strong>
-                  </p>
-                </div>
-              )}
+                )}
 
               {data?.seller_decision === "approved" && (
                 <div className='flex flex-col gap-1 items-end'>
@@ -481,24 +372,65 @@ const DetailBarangRusakPage = () => {
           </ComplainInfoSection>
 
           {/* Informasi Komplain */}
-          <ComplainInfoSection title='Informasi Komplain'>
-            <InfoRow
-              label='ID Transaksi'
-              value={data?.transaction?.transaction_code}
-            />
-            <InfoRow label='Nama Barang' value={data?.transaction?.item_name} />
-            <InfoRow label='Status' value={data?.statusMap} />
-            <InfoRow label='Pembeli' value={data?.transaction?.buyer?.email} />
-            <InfoRow label='Penjual' value={data?.transaction?.seller?.email} />
-            <div className='mt-4 flex justify-end'>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 font-sf-pro">Informasi Komplain</h2>
               <button
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold text-base font-sf-pro transition"
                 onClick={handleNavigateToRekberDetail}
-                className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors cursor-pointer'
               >
                 Lihat Detail Rekber
               </button>
             </div>
-          </ComplainInfoSection>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Kolom Kiri */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">ID Transaksi</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.transaction_code}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Nama Barang</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.item_name}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Buyer</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.buyer?.email}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Seller</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.seller?.email}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">No Resi Ekspedisi</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro tracking-widest">{data?.transaction?.shipment?.tracking_number}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Ekspedisi</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.shipment?.courier?.name}</span>
+                </div>
+              </div>
+              {/* Kolom Kanan */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Tagihan Rekber</p>
+                  <div className="bg-gray-100 rounded px-4 py-2 text-lg font-bold text-gray-900 font-sf-pro">{formatCurrency(data?.transaction?.total_amount)}</div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Nominal Barang</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.item_price}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Asuransi Pengiriman BNI Life (0.2%)</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.insurance_fee}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi</p>
+                  <span className="text-sm font-medium text-gray-900 font-sf-pro">{data?.transaction?.platform_fee}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Informasi Pengiriman */}
           {data?.return_shipment && (
@@ -607,14 +539,9 @@ const InformasiPengiriman = ({ data }) => (
 );
 
 const InformasiPengajuan = ({
-  submissionInfo,
-  onSetuju,
-  onTolak,
   showKonfirmasi,
-  setShowKonfirmasi,
   konfirmasiType,
   onKonfirmasi,
-  currentStatus,
   data,
 }) => (
   <div className='bg-white rounded-lg border border-gray-200 p-6 mt-6'>

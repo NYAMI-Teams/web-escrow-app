@@ -171,7 +171,7 @@ const DetailBarangHilangPage = () => {
                                     <span className="text-sm font-medium text-gray-900 font-sf-pro">{detail?.komplain?.biayaAsuransi}</span>
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi (0.8 %)</p>
+                                    <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi</p>
                                     <span className="text-sm font-medium text-gray-900 font-sf-pro">{detail?.komplain?.biayaJasa}</span>
                                 </div>
                             </div>
