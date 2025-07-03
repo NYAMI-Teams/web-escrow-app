@@ -77,7 +77,7 @@ const columns = [
     { key: "noResi", label: "No Resi", minWidth: "140px" },
     { key: "ekspedisi", label: "Ekspedisi", minWidth: "180px", sortable: true },
     { key: "statusMap", label: "Status Komplain", minWidth: "160px", filterable: true },
-    { key: "statusPengajuan", label: "Status Pengajuan", minWidth: "160px" },
+    // { key: "statusPengajuan", label: "Status Pengajuan", minWidth: "160px" },
     { key: "asuransi", label: "Asuransi", minWidth: "80px" },
 ];
 

@@ -57,7 +57,7 @@ const ComplainInfoSection = ({ data, onDetailRekberClick }) => {
                         <span className="text-sm font-medium text-gray-900 font-sf-pro">{data.biayaAsuransi || "Rp. 16.000,00"}</span>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi (0.8 %)</p>
+                        <p className="text-sm text-gray-500 mb-1 font-sf-pro">Biaya Jasa Aplikasi</p>
                         <span className="text-sm font-medium text-gray-900 font-sf-pro">{data.biayaJasa || "Rp. 64.000,00"}</span>
                     </div>
                 </div>
