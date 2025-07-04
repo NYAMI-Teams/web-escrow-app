@@ -20,7 +20,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (
+      error?.response?.data?.message === "invalid signature" ||
+      error?.response?.data?.message?.includes("token") ||
+      error?.response?.data?.message?.includes("jwt") ||
+      error?.response?.status === 401 || // Unauthorized
+      error?.response?.status === 403 // Forbidden
+    ) {
       localStorage.removeItem("accessToken");
       window.location.href = "/";
     }
