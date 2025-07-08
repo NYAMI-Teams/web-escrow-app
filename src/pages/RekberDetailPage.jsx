@@ -306,6 +306,7 @@ const mapFundReleaseStatus = (requested, status) => {
 };
 
 const RekberDetailPage = () => {
+  const [data, setData] = useState(null);
   const [currentStatus, setCurrentStatus] = useState("menungguPembayaran");
   const [showKonfirmasi, setShowKonfirmasi] = useState(false);
   const [konfirmasiType, setKonfirmasiType] = useState(null);
@@ -323,6 +324,7 @@ const RekberDetailPage = () => {
     try {
       const res = await getTransactionById(transactionId);
       const item = res.data;
+      setData(item);
 
       setInitialRekberInfo({
         virtualAccount: item.virtualAccount,
@@ -646,7 +648,7 @@ const RekberDetailPage = () => {
           <RekberInfoSection {...infoProps} />
           {(currentStatus === "dalamPengiriman" ||
             showSubmission ||
-            currentStatus === "barangDiterima") && (
+            currentStatus === "barangDiterima" || data?.shipment?.trackingNumber) && (
             <InformasiPengiriman shippingInfo={shippingInfo} />
           )}
           {showSubmission && (
@@ -662,7 +664,7 @@ const RekberDetailPage = () => {
             />
           )}
         </div>
-      </div>
+      </div>  
     </div>
   );
 };
